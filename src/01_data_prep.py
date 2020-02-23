@@ -6,6 +6,8 @@ import seaborn as sns
 
 sns.set_style('whitegrid')
 
+# TODO create a variable for pwd
+
 os.chdir(
     "/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/")
 
@@ -50,7 +52,8 @@ hospital_general_information =  hospital_general_information.replace('Not Availa
 
 hospital_general_information.shape
 
-hospital_general_information.to_csv("./data/final/Hospital_General_Information.csv",
+# TODO encode the Below/Same/Above values
+hospital_general_information.to_csv("./data/intermediate/Hospital_General_Information.csv",
                                     encoding='utf-8')
 
 
@@ -65,6 +68,8 @@ columns_with_missing_data_above_20
 # NOTE Some columns could be pruned / imputed.
 # TODO Decide on what to do with sparse columns. ( missing > 30 )
 """
+# These are star-rating-groups
+
 Hospital overall rating                                 24.28
 Mortality national comparison                           27.75
 Safety of care national comparison                      39.27
