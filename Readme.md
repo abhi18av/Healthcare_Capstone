@@ -1,5 +1,10 @@
 # Notes
 
+### Link for UpGrad project session
+
+https://www.youtube.com/watch?v=igR7zGB1nvQ
+
+
 ### Star ratings
 
 Found a new updated version for the star ratings on this page
