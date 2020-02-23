@@ -52,6 +52,7 @@ hospital_general_information =  hospital_general_information.replace('Not Availa
 
 hospital_general_information.shape
 
+
 # TODO encode the Below/Same/Above values
 hospital_general_information.to_csv("./data/intermediate/Hospital_General_Information.csv",
                                     encoding='utf-8')
@@ -67,6 +68,9 @@ columns_with_missing_data_above_20
 
 # NOTE Some columns could be pruned / imputed.
 # TODO Decide on what to do with sparse columns. ( missing > 30 )
+
+#---------------------
+
 """
 # These are star-rating-groups
 
@@ -83,4 +87,8 @@ Efficient use of medical imaging national comparison    42.05
 
 columns_with_missing_data_above_20.plot(kind='bar')
 plt.show()
+
+
+
+
 
