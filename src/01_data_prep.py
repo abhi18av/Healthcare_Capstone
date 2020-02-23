@@ -55,9 +55,27 @@ hospital_general_information.to_csv("./data/final/Hospital_General_Information.c
 
 
 columns_with_missing_data = round(100 * (hospital_general_information.isnull().sum() / len(hospital_general_information.index)), 2)
-columns_with_missing_data_above_30 = columns_with_missing_data[columns_with_missing_data > 30]
-columns_with_missing_data_above_30
+columns_with_missing_data
 
-columns_with_missing_data_above_30.plot(kind='bar')
+
+columns_with_missing_data_above_20 = columns_with_missing_data[columns_with_missing_data > 20]
+columns_with_missing_data_above_20
+
+
+# NOTE Some columns could be pruned / imputed.
+# TODO Decide on what to do with sparse columns. ( missing > 30 )
+"""
+Hospital overall rating                                 24.28
+Mortality national comparison                           27.75
+Safety of care national comparison                      39.27
+Readmission national comparison                         20.80
+Patient experience national comparison                  28.12
+Effectiveness of care national comparison               23.16
+Timeliness of care national comparison                  27.63
+Efficient use of medical imaging national comparison    42.05
+"""
+
+
+columns_with_missing_data_above_20.plot(kind='bar')
 plt.show()
 
