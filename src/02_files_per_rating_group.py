@@ -49,11 +49,26 @@ Readmission national comparison
 """
 Patient experience national comparison
 """
-# HCAHPS_Hospital.csv
-# hvbp_hcahps_08_26_2016.csv
+#HOSPITAL_QUARTERLY_HAC_DOMAIN_HOSPITAL_02_26_2016.csv
+#HOSPITAL_QUARTERLY_MSPB_6_DECIMALS.csv (doubt)
+#Complications - Hospital.csv (doubt)
+#READMISSION REDUCTION.csv
+#Hvbp_hai_08_26_2016.csv
+#HCAHPS - Hospital.csv
+#Hvbp_hcahps_08_26_2016.csv
+#hvbp_tps_08_26_2016.csv
+
 """
 Effectiveness of care national comparison
 """
+#Complications - Hospital.csv
+#Healthcare Associated Infections - Hospital.csv
+#READMISSION REDUCTION.csv
+#Readmissions and Deaths - Hospital.csv → readmission part only
+#Timely and Effective Care - Hospital
+#hvbp_hcahps_08_26_2016.csv
+#Hvbp_scip_08_26_2016.csv
+#Ambulatory Surgical Measures-Facility.csv
 
 """
 Timeliness of care national comparison
