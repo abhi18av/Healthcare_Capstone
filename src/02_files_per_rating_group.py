@@ -240,146 +240,95 @@ hvbp_tps = process_raw_csv(
                            'Unweighted Normalized Efficiency Domain Score']
 )
 
+readmissions_and_deaths = process_raw_csv(
+    input_csv_name="Readmissions_and_Deaths_Hospital.csv",
+    output_csv_group_name="group_05_patient_experience_national_comparison",
+    columns_to_be_dropped=['Hospital Name',
+                           'Address',
+                           'City',
+                           'State',
+                           'ZIP Code',
+                           'Phone Number',
+                           'Measure Name',
+                           'Compared to National',
+                           'Denominator',
+                           'County Name',
+                           'Lower Estimate',
+                           'Higher Estimate',
+                           'Footnote'])
 
-Readmissions_and_Deaths_Hospital_orig = pd.read_csv(
-    "./raw/Hospital_Revised_FlatFiles_20161110/Both_MeasureID_ And_ProviderID/Readmissions_and_Deaths_Hospital.csv",
-    encoding="ISO-8859-1")
-
-Readmissions_and_Deaths_Hospital = Readmissions_and_Deaths_Hospital_orig.copy()
-
-Readmissions_and_Deaths_Hospital.columns
-
-Readmissions_and_Deaths_Hospital.drop(['Hospital Name',
-                                       'Address',
-                                       'City',
-                                       'State',
-                                       'ZIP Code',
-                                       'Phone Number',
-                                       'Measure Name',
-                                       'Compared to National',
-                                       'Denominator',
-                                       'County Name',
-                                       'Lower Estimate',
-                                       'Higher Estimate',
-                                       'Footnote'],
-                                      axis=1,
-                                      inplace=True)
-
-Readmissions_and_Deaths_Hospital.columns
-
-Readmissions_and_Deaths_Hospital.to_csv(
-    "./intermediate/group_05_patient_experience_national_comparison/Readmissions_and_Deaths_Hospital.csv",
-    encoding='utf-8')
-
-Structural_Measures_Hospital_orig = pd.read_csv(
-    "./raw/Hospital_Revised_FlatFiles_20161110/Both_MeasureID_ And_ProviderID/Structural_Measures_Hospital.csv",
-    encoding="ISO-8859-1")
-
-Structural_Measures_Hospital = Structural_Measures_Hospital_orig.copy()
-
-Structural_Measures_Hospital.columns
-
-Structural_Measures_Hospital.drop(['Hospital Name',
-                                   'Address',
-                                   'City',
-                                   'State',
-                                   'ZIP Code',
-                                   'County Name',
-                                   'Phone Number',
-                                   'Measure Name',
-                                   'County Name',
-                                   'Footnote',
-                                   'Measure Start Date',
-                                   'Measure End Date'],
-                                  axis=1,
-                                  inplace=True)
-
-Structural_Measures_Hospital.to_csv(
-    "./intermediate/group_05_patient_experience_national_comparison/Structural_Measures_Hospital.csv",
-    encoding='utf-8')
+structural_measures = process_raw_csv(
+    input_csv_name="Structural_Measures_Hospital.csv",
+    output_csv_group_name="group_05_patient_experience_national_comparison",
+    columns_to_be_dropped=['Hospital Name',
+                           'Address',
+                           'City',
+                           'State',
+                           'ZIP Code',
+                           'County Name',
+                           'Phone Number',
+                           'Measure Name',
+                           'County Name',
+                           'Footnote',
+                           'Measure Start Date',
+                           'Measure End Date']
+)
 
 # ### Effectiveness Of Care
 
 
-Healthcare_Associated_Infections_Hospital_orig = pd.read_csv(
-    "./raw/Hospital_Revised_FlatFiles_20161110/Both_MeasureID_ And_ProviderID/Healthcare_Associated_Infections_Hospital.csv",
-    encoding="ISO-8859-1")
+healthcare_associated_infections = process_raw_csv(
+    input_csv_name="Healthcare_Associated_Infections_Hospital.csv",
+    output_csv_group_name="group_06_effectiveness_of_care_national_comparison",
+    columns_to_be_dropped=['Hospital Name',
+                           'Address',
+                           'City',
+                           'State',
+                           'ZIP Code',
+                           'Phone Number',
+                           'Measure Name',
+                           'Compared to National',
+                           'County Name',
+                           'Footnote']
+)
 
-Healthcare_Associated_Infections_Hospital = Healthcare_Associated_Infections_Hospital_orig.copy()
+ambulatory_surgical_measures_facility = process_raw_csv(
+    input_csv_name="Ambulatory_Surgical_Measures_Facility.csv",
+    output_csv_group_name="",
+    columns_to_be_dropped=['ASC_Name',
+                           'City',
+                           'State',
+                           'ZIP_Code',
+                           'Year',
+                           'ASC1_Footnote',
+                           'ASC2_Footnote',
+                           'ASC3_Footnote',
+                           'ASC4_Footnote',
+                           'ASC5_Footnote',
+                           'ASC6_Footnote',
+                           'ASC_7_Volume',
+                           'ASC_7_Gastrointestinal',
+                           'ASC_7_Eye',
+                           'ASC_7_Musculoskeletal',
+                           'ASC_7_Skin',
+                           'ASC_7_Genitourinary',
+                           'ASC_7_Multi_System',
+                           'ASC_7_Nervous_System',
+                           'ASC_7_Respiratory',
+                           'ASC7_Footnote',
+                           'ASC_6_7_Encounter_Start_Date',
+                           'ASC_6_7_Encounter_End_Date',
+                           'ASC8_Footnote',
+                           'ASC_8_Encounter_Date',
+                           'ASC9_Footnote',
+                           'ASC10_Footnote',
+                           'ASC_9_10_Encounter_Start_Date',
+                           'ASC_9_10_Encounter_End_Date'])
 
-Healthcare_Associated_Infections_Hospital.columns
-
-Healthcare_Associated_Infections_Hospital.drop(['Hospital Name',
-                                                'Address',
-                                                'City',
-                                                'State',
-                                                'ZIP Code',
-                                                'Phone Number',
-                                                'Measure Name',
-                                                'Compared to National',
-                                                'County Name',
-                                                'Footnote'],
-                                               axis=1,
-                                               inplace=True)
-
-Healthcare_Associated_Infections_Hospital.columns
-
-Healthcare_Associated_Infections_Hospital.to_csv(
-    "./intermediate/group_06_effectiveness_of_care_national_comparison/Healthcare_Associated_Infections_Hospital.csv",
-    encoding='utf-8')
-
-Ambulatory_Surgical_Measures_Facility_orig = pd.read_csv(
-    "./raw/Hospital_Revised_FlatFiles_20161110/Provider_ID/Ambulatory_Surgical_Measures_Facility.csv",
-    encoding="ISO-8859-1")
-
-Ambulatory_Surgical_Measures_Facility = Ambulatory_Surgical_Measures_Facility_orig.copy()
-
-Ambulatory_Surgical_Measures_Facility.columns
-
-Ambulatory_Surgical_Measures_Facility.drop(['ASC_Name',
-                                            'City',
-                                            'State',
-                                            'ZIP_Code',
-                                            'Year',
-                                            'ASC1_Footnote',
-                                            'ASC2_Footnote',
-                                            'ASC3_Footnote',
-                                            'ASC4_Footnote',
-                                            'ASC5_Footnote',
-                                            'ASC6_Footnote',
-                                            'ASC_7_Volume',
-                                            'ASC_7_Gastrointestinal',
-                                            'ASC_7_Eye',
-                                            'ASC_7_Musculoskeletal',
-                                            'ASC_7_Skin',
-                                            'ASC_7_Genitourinary',
-                                            'ASC_7_Multi_System',
-                                            'ASC_7_Nervous_System',
-                                            'ASC_7_Respiratory',
-                                            'ASC7_Footnote',
-                                            'ASC_6_7_Encounter_Start_Date',
-                                            'ASC_6_7_Encounter_End_Date',
-                                            'ASC8_Footnote',
-                                            'ASC_8_Encounter_Date',
-                                            'ASC9_Footnote',
-                                            'ASC10_Footnote',
-                                            'ASC_9_10_Encounter_Start_Date',
-                                            'ASC_9_10_Encounter_End_Date'],
-                                           axis=1,
-                                           inplace=True)
-
-Ambulatory_Surgical_Measures_Facility.to_csv(
-    "./intermediate/group_06_effectiveness_of_care_national_comparison/Ambulatory_Surgical_Measures_Facility.csv",
-    encoding='utf-8')
-
-hvbp_scip_08_26_2016_orig = pd.read_csv(
-    "./raw/Hospital_Revised_FlatFiles_20161110/Provider_ID/hvbp_scip_08_26_2016.csv", encoding="ISO-8859-1")
-
-hvbp_scip_08_26_2016 = hvbp_scip_08_26_2016_orig.copy()
-
-hvbp_scip_08_26_2016.columns
-
-hvbp_scip_08_26_2016.drop(['Hospital Name',
+hvbp_scip = process_raw_csv(
+    input_csv_name="hvbp_scip_08_26_2016.csv",
+    output_csv_group_name="group_06_effectiveness_of_care_national_comparison",
+    columns_to_be_dropped=['Hospital Name',
                            'Address',
                            'City',
                            'State',
@@ -390,84 +339,46 @@ hvbp_scip_08_26_2016.drop(['Hospital Name',
                            'SCIP-Card-2 Improvement Points',
                            'SCIP-VTE-2 Performance Rate',
                            'SCIP-VTE-2 Achievement Points',
-                           'SCIP-VTE-2 Improvement Points', ],
-                          axis=1,
-                          inplace=True)
+                           'SCIP-VTE-2 Improvement Points'])
 
-hvbp_scip_08_26_2016.columns
+readmission_reduction = process_raw_csv(
+    input_csv_name="READMISSION_REDUCTION.csv",
+    output_csv_group_name="group_06_effectiveness_of_care_national_comparison",
+    columns_to_be_dropped=['Hospital Name',
+                           'State',
+                           'Footnote']
+)
 
-hvbp_scip_08_26_2016.to_csv(
-    "./intermediate/group_06_effectiveness_of_care_national_comparison/hvbp_scip_08_26_2016.csv",
-    encoding='utf-8')
+readmissions_and_deaths_2 = process_raw_csv(
+    input_csv_name="Readmissions_and_Deaths_Hospital.csv",
+    output_csv_group_name="group_06_effectiveness_of_care_national_comparison",
+    columns_to_be_dropped=['Hospital Name',
+                           'Address',
+                           'City',
+                           'State',
+                           'ZIP Code',
+                           'County Name',
+                           'Phone Number',
+                           'Measure Name',
+                           'Denominator',
+                           'Lower Estimate',
+                           'Higher Estimate',
+                           'Footnote']
+)
 
-READMISSION_REDUCTION_orig = pd.read_csv(
-    "./raw/Hospital_Revised_FlatFiles_20161110/Both_MeasureID_ And_ProviderID/READMISSION_REDUCTION.csv",
-    encoding="ISO-8859-1")
-
-READMISSION_REDUCTION = READMISSION_REDUCTION_orig.copy()
-
-READMISSION_REDUCTION.columns
-
-READMISSION_REDUCTION.drop(['Hospital Name',
-                            'State',
-                            'Footnote'],
-                           axis=1,
-                           inplace=True)
-
-READMISSION_REDUCTION.to_csv(
-    "./intermediate/group_06_effectiveness_of_care_national_comparison/READMISSION_REDUCTION.csv",
-    encoding='utf-8')
-
-Readmissions_and_Deaths_Hospital_orig = pd.read_csv(
-    "./raw/Hospital_Revised_FlatFiles_20161110/Both_MeasureID_ And_ProviderID/Readmissions_and_Deaths_Hospital.csv",
-    encoding="ISO-8859-1")
-
-Readmissions_and_Deaths_Hospital = Readmissions_and_Deaths_Hospital_orig.copy()
-
-Readmissions_and_Deaths_Hospital.columns
-
-Readmissions_and_Deaths_Hospital.drop(['Hospital Name',
-                                       'Address',
-                                       'City',
-                                       'State',
-                                       'ZIP Code',
-                                       'County Name',
-                                       'Phone Number',
-                                       'Measure Name',
-                                       'Denominator',
-                                       'Lower Estimate',
-                                       'Higher Estimate',
-                                       'Footnote'],
-                                      axis=1,
-                                      inplace=True)
-
-Readmissions_and_Deaths_Hospital.to_csv(
-    "./intermediate/group_06_effectiveness_of_care_national_comparison/Readmissions_and_Deaths_Hospital.csv",
-    encoding='utf-8')
-
-Timely_and_Effective_Care_Hospital_orig = pd.read_csv(
-    "./raw/Hospital_Revised_FlatFiles_20161110/Both_MeasureID_ And_ProviderID/Timely_and_Effective_Care_Hospital.csv",
-    encoding="ISO-8859-1")
-
-Timely_and_Effective_Care_Hospital = Timely_and_Effective_Care_Hospital_orig.copy()
-
-Timely_and_Effective_Care_Hospital.columns
-
-Timely_and_Effective_Care_Hospital.drop(['Hospital Name',
-                                         'Address',
-                                         'City',
-                                         'State',
-                                         'ZIP Code',
-                                         'County Name',
-                                         'Phone Number',
-                                         'Measure Name',
-                                         'Footnote'],
-                                        axis=1,
-                                        inplace=True)
-
-Timely_and_Effective_Care_Hospital.to_csv(
-    "./intermediate/group_06_effectiveness_of_care_national_comparison/Timely_and_Effective_Care_Hospital.csv",
-    encoding='utf-8')
+timely_and_effective_care = process_raw_csv(
+    input_csv_name="Timely_and_Effective_Care_Hospital.csv",
+    output_csv_group_name="group_06_effectiveness_of_care_national_comparison",
+    columns_to_be_dropped=['Hospital Name',
+                           'Address',
+                           'City',
+                           'State',
+                           'ZIP Code',
+                           'County Name',
+                           'Phone Number',
+                           'Measure Name',
+                           'Footnote']
+)
 
 # ### Use Of Medical Imaging
 
@@ -476,8 +387,6 @@ Outpatient_Imaging_Efficiency_Hospital = pd.read_csv(
     encoding="ISO-8859-1")
 
 Outpatient_Imaging_Efficiency_Hospital = Outpatient_Imaging_Efficiency_Hospital.copy()
-
-Outpatient_Imaging_Efficiency_Hospital.columns
 
 Outpatient_Imaging_Efficiency_Hospital.drop(['Hospital Name',
                                              'Address',
