@@ -27,7 +27,7 @@ We start our analysis with the Hospital_General_Information.csv in mind.
 """
 
 hospital_general_information_orig = pd.read_csv(
-    "./data/raw/Hospital_Revised_FlatFiles_20161110/Provider_ID/Hospital_General_Information.csv",
+    "./data/raw/Hospital_Revised_FlatFiles_20161110_/Provider_ID/Hospital_General_Information.csv",
     encoding="ISO-8859-1")
 
 # Create a working copy
@@ -46,11 +46,10 @@ hospital_general_information.drop(['Hospital overall rating footnote',
                                   axis=1,
                                   inplace=True)
 
-hospital_general_information.columns
-
 hospital_general_information = hospital_general_information.replace('Not Available', np.nan)
 
-hospital_general_information.shape
+# hospital_general_information.columns
+# hospital_general_information.shape
 
 # TODO encode the Below/Same/Above values
 hospital_general_information.to_csv("./data/intermediate/Hospital_General_Information.csv",
