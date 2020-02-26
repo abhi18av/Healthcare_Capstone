@@ -26,13 +26,14 @@ We start our analysis with the Hospital_General_Information.csv in mind.
 
 """
 
-hospital_general_information_orig = pd.read_csv("./data/raw/Hospital_Revised_FlatFiles_20161110/Provider_ID/Hospital_General_Information.csv", encoding = "ISO-8859-1")
+hospital_general_information_orig = pd.read_csv(
+    "./data/raw/Hospital_Revised_FlatFiles_20161110/Provider_ID/Hospital_General_Information.csv",
+    encoding="ISO-8859-1")
 
 # Create a working copy
-hospital_general_information =  hospital_general_information_orig.copy()
+hospital_general_information = hospital_general_information_orig.copy()
 
 hospital_general_information.head()
-
 
 hospital_general_information.drop(['Hospital overall rating footnote',
                                    'Mortality national comparison footnote',
@@ -45,31 +46,27 @@ hospital_general_information.drop(['Hospital overall rating footnote',
                                   axis=1,
                                   inplace=True)
 
-
 hospital_general_information.columns
 
-hospital_general_information =  hospital_general_information.replace('Not Available', np.nan)
+hospital_general_information = hospital_general_information.replace('Not Available', np.nan)
 
 hospital_general_information.shape
-
 
 # TODO encode the Below/Same/Above values
 hospital_general_information.to_csv("./data/intermediate/Hospital_General_Information.csv",
                                     encoding='utf-8')
 
-
-columns_with_missing_data = round(100 * (hospital_general_information.isnull().sum() / len(hospital_general_information.index)), 2)
+columns_with_missing_data = round(
+    100 * (hospital_general_information.isnull().sum() / len(hospital_general_information.index)), 2)
 columns_with_missing_data
-
 
 columns_with_missing_data_above_20 = columns_with_missing_data[columns_with_missing_data > 20]
 columns_with_missing_data_above_20
 
-
 # NOTE Some columns could be pruned / imputed.
 # TODO Decide on what to do with sparse columns. ( missing > 30 )
 
-#---------------------
+# ---------------------
 
 """
 # These are star-rating-groups
@@ -84,11 +81,5 @@ Timeliness of care national comparison                  27.63
 Efficient use of medical imaging national comparison    42.05
 """
 
-
 columns_with_missing_data_above_20.plot(kind='bar')
 plt.show()
-
-
-
-
-
