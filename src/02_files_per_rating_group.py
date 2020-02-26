@@ -161,8 +161,10 @@ hcahps_hospital = process_raw_csv(input_csv_name="HCAHPS_Hospital.csv",
                                                          'Number of Completed Surveys',
                                                          'Number of Completed Surveys Footnote',
                                                          'Survey Response Rate Percent',
-                                                         'Survey Response Rate Percent Footnote'
-                                                         ])
+                                                         'Survey Response Rate Percent Footnote',
+                                                         'Measure Start Date',
+                                                         'Measure End Date'],
+                                  replace_with_nan="Not Applicable")
 
 hospital_hac_domain = process_raw_csv(input_csv_name="HOSPITAL_QUARTERLY_HAC_DOMAIN_HOSPITAL_02_26_2016.csv",
                                       output_csv_group_name="group_05_patient_experience_national_comparison",
@@ -255,7 +257,9 @@ readmissions_and_deaths = process_raw_csv(
                            'County Name',
                            'Lower Estimate',
                            'Higher Estimate',
-                           'Footnote'])
+                           'Footnote',
+                           'Measure Start Date',
+                           'Measure End Date'])
 
 structural_measures = process_raw_csv(
     input_csv_name="Structural_Measures_Hospital.csv",
@@ -289,8 +293,9 @@ healthcare_associated_infections = process_raw_csv(
                            'Measure Name',
                            'Compared to National',
                            'County Name',
-                           'Footnote']
-)
+                           'Footnote',
+                           'Measure Start Date',
+                           'Measure End Date'])
 
 ambulatory_surgical_measures_facility = process_raw_csv(
     input_csv_name="Ambulatory_Surgical_Measures_Facility.csv",
@@ -346,8 +351,9 @@ readmission_reduction = process_raw_csv(
     output_csv_group_name="group_06_effectiveness_of_care_national_comparison",
     columns_to_be_dropped=['Hospital Name',
                            'State',
-                           'Footnote']
-)
+                           'Footnote',
+                           'Start Date',
+                           'End Date'])
 
 readmissions_and_deaths_2 = process_raw_csv(
     input_csv_name="Readmissions_and_Deaths_Hospital.csv",
@@ -363,8 +369,9 @@ readmissions_and_deaths_2 = process_raw_csv(
                            'Denominator',
                            'Lower Estimate',
                            'Higher Estimate',
-                           'Footnote']
-)
+                           'Footnote',
+                           'Measure Start Date',
+                           'Measure End Date'])
 
 timely_and_effective_care = process_raw_csv(
     input_csv_name="Timely_and_Effective_Care_Hospital.csv",
@@ -377,29 +384,23 @@ timely_and_effective_care = process_raw_csv(
                            'County Name',
                            'Phone Number',
                            'Measure Name',
-                           'Footnote']
-)
+                           'Footnote',
+                           'Measure Start Date',
+                           'Measure End Date'])
 
 # ### Use Of Medical Imaging
 
-Outpatient_Imaging_Efficiency_Hospital = pd.read_csv(
-    "./raw/Hospital_Revised_FlatFiles_20161110/Both_MeasureID_ And_ProviderID/Outpatient_Imaging_Efficiency_Hospital.csv",
-    encoding="ISO-8859-1")
-
-Outpatient_Imaging_Efficiency_Hospital = Outpatient_Imaging_Efficiency_Hospital.copy()
-
-Outpatient_Imaging_Efficiency_Hospital.drop(['Hospital Name',
-                                             'Address',
-                                             'City',
-                                             'State',
-                                             'ZIP Code',
-                                             'County Name',
-                                             'Phone Number',
-                                             'Measure Name',
-                                             'Footnote'],
-                                            axis=1,
-                                            inplace=True)
-
-Outpatient_Imaging_Efficiency_Hospital.to_csv(
-    "./intermediate/group_08_efficient_use_of_medical_imaging_national_comparison/Outpatient_Imaging_Efficiency_Hospital.csv",
-    encoding='utf-8')
+outpatient_imaging_efficiency = process_raw_csv(
+    input_csv_name="Outpatient_Imaging_Efficiency_Hospital.csv",
+    output_csv_group_name="group_06_effectiveness_of_care_national_comparison",
+    columns_to_be_dropped=['Hospital Name',
+                           'Address',
+                           'City',
+                           'State',
+                           'ZIP Code',
+                           'County Name',
+                           'Phone Number',
+                           'Measure Name',
+                           'Footnote',
+                           'Measure Start Date',
+                           'Measure End Date'])
