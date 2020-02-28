@@ -44,6 +44,10 @@ import warnings
 warnings.filterwarnings('ignore')
 sns.set_style('whitegrid')
 
+# Util fuction: line seperator
+def print_ln():
+    print('-' * 80, '\n')
+
 ```
 #===================================================
 # Utility functions to be used
@@ -204,10 +208,51 @@ read_hosp
 
 ```{r}
 read_meas <- read_rawdata[, c(1, 10, 13)]
-read_meas$Score <- func_numeric(read_meas$Score)
-read_meas <- subset(read_meas, Measure.ID %in% read_meas_list)
 str(read_meas)
 ```
+```{python}
+read_meas = read_rawdata.iloc[: , [0,9,12]]
+read_meas
+
+print_ln()
+read_meas.info()
+
+print_ln()
+read_meas.dtypes
+```
+
+
+```{r}
+read_meas$Score <- func_numeric(read_meas$Score)
+read_meas$Score
+```
+```{python}
+read_meas['Score'] = read_meas['Score'].astype(float)
+read_meas.dtypes
+
+print_ln()
+read_meas
+```
+```{r}
+read_meas <- subset(read_meas, Measure.ID %in% read_meas_list)
+
+#unique(read_meas$Measure.ID) # Has the same values as in read_meas_list
+
+str(read_meas)
+```
+
+
+
+```{python}
+
+#read_meas['Measure ID'].unique()
+#print_ln()
+#len(read_meas['Measure ID'].unique())
+
+read_meas = read_meas.loc[read_meas['Measure ID'].isin(read_meas_list)] 
+read_meas
+```
+
 
 ```{r}
 read_meas_score <- spread(read_meas, Measure.ID, Score)
