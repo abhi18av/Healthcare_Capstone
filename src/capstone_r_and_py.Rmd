@@ -84,6 +84,18 @@ func_rename <- function(x) {
 ```
 
 ```{python}
+def rename_columns(df):
+    old_col_names = df.columns.to_list()
+    new_col_names = []
+    for a_col_name in old_col_names:
+        col_name = a_col_name + "_score" 
+        new_col_names.append(col_name)
+
+    name_pairs = dict(zip(old_col_names, new_col_names))
+    df = df.rename(columns = name_pairs)
+    return df
+
+
 ```
 
 ## Function to scale the values.
@@ -239,6 +251,8 @@ read_meas <- subset(read_meas, Measure.ID %in% read_meas_list)
 #unique(read_meas$Measure.ID) # Has the same values as in read_meas_list
 
 str(read_meas)
+
+read_meas
 ```
 
 
@@ -256,13 +270,42 @@ read_meas
 
 ```{r}
 read_meas_score <- spread(read_meas, Measure.ID, Score)
+colnames(read_meas_score)
 str(read_meas_score)
+read_meas_score
 ```
+
+```{python}
+read_meas_score = read_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
+print_ln()
+read_meas_score.columns
+print_ln()
+read_meas_score
+print_ln()
+read_meas_score.dtypes
+print_ln()
+read_meas_score.info()
+```
+
 
 ```{r}
 read_meas_score <- func_rename(read_meas_score)
 str(read_meas_score)
 ```
+```{python}
+read_meas_score =  rename_columns(read_meas_score)
+read_meas_score
+```
+```{r}
+#
+sum(unique(read_meas_score$READM_30_AMI_score_score), na.rm=TRUE)
+```
+```{python}
+#
+np.nansum(read_meas_score['READM_30_AMI_score'].unique())
+
+```
+
 
 ```{r}
 readmission <- read_meas_score
