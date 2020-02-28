@@ -88,11 +88,11 @@ def rename_columns(df):
     old_col_names = df.columns.to_list()
     new_col_names = []
     for a_col_name in old_col_names:
-        col_name = a_col_name + "_score" 
+        col_name = a_col_name + "_score"
         new_col_names.append(col_name)
 
     name_pairs = dict(zip(old_col_names, new_col_names))
-    df = df.rename(columns = name_pairs)
+    df = df.rename(columns=name_pairs)
     return df
 
 
@@ -112,12 +112,18 @@ positive_zscore <- function(i) {
 ```
 
 ```{python}
+def negative_zscore(dataframe):
+    df = dataframe.copy()
+    cols = list(df.columns)
+    for col in cols:
+        df[col] = - (df[col] - df[col].mean())/df[col].std(ddof=0)
+#    df[col] = (df[col].mean())/df[col].std(ddof=0)
+    return df
 
-def negative_zscore:
+
+def positive_zscore(df):
     pass
-    
-def positive_zscore:
-    pass
+#    return ((df - df.mean()) / df.std(ddof=0))
 
 ```
 
@@ -263,7 +269,7 @@ read_meas
 #print_ln()
 #len(read_meas['Measure ID'].unique())
 
-read_meas = read_meas.loc[read_meas['Measure ID'].isin(read_meas_list)] 
+read_meas = read_meas.loc[read_meas['Measure ID'].isin(read_meas_list)]
 read_meas
 ```
 
@@ -295,10 +301,11 @@ str(read_meas_score)
 ```{python}
 read_meas_score =  rename_columns(read_meas_score)
 read_meas_score
+
 ```
 ```{r}
 #
-sum(unique(read_meas_score$READM_30_AMI_score_score), na.rm=TRUE)
+sum(unique(read_meas_score$READM_30_AMI_score), na.rm = TRUE)
 ```
 ```{python}
 #
@@ -312,8 +319,22 @@ readmission <- read_meas_score
 # # We will use negative zscore scaling as high readmissions implies the Hospital is not doing well in terms of patient treatment quality.
 readmission[, 2:ncol(readmission)] <- sapply(readmission[, -1], negative_zscore)
 str(readmission)
+readmission
 ```
 
+
+
+```{python}
+
+readmission = read_meas_score
+#readmission
+
+print_ln()
+readmission = negative_zscore(readmission)
+#print_ln()
+readmission.head()
+
+```
 # Outlier treatment: According to the CMS documentation, they've performed the outlier treatment for
 # measures at the 0.125th and the 99.875th percentiles
 
