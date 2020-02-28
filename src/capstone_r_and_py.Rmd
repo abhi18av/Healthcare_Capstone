@@ -132,8 +132,210 @@ write.csv(readmission, "cleaned_readmission_data.csv")
 ```{python}
 ```
 
+#===================================================
+## 2. Mortality - Load 2 Files "Readmissions and Deaths - Hospital.csv + Complications - Hospital.csv" into morality dataframe
+#===================================================
 
 ```{r}
+mort_rawdata1 <- read_rawdata
+mort_rawdata2 <- read.csv("Complications - Hospital.csv", stringsAsFactors = FALSE, na.strings = c("Not Available", "Not Applicable"))
+identical(names(mort_rawdata1), names(mort_rawdata2))
+# [1] TRUE
+mort_rawdata <- rbind(mort_rawdata1, mort_rawdata2)
+mort_meas_list = c("MORT_30_AMI", "MORT_30_CABG", "MORT_30_COPD", "MORT_30_HF", "MORT_30_PN", "MORT_30_STK", "PSI_4_SURG_COMP")
+mort_hosp <- mort_rawdata[, c(1:8)]
+mort_hosp = mort_hosp[!duplicated(mort_hosp),]
+mort_meas <- mort_rawdata[, c(1, 10, 13)]
+mort_meas <- subset(mort_meas, Measure.ID %in% mort_meas_list)
+mort_meas$Score <- func_numeric(mort_meas$Score)
+mort_meas_score <- spread(mort_meas, Measure.ID, Score)
+mort_meas_score <- func_rename(mort_meas_score)
+str(mort_meas_score)
+mortality <- mort_meas_score
+# Mortality indicates the death rate, higher the number worser is the hospital or provider.
+# Since it is related to death rate we will use negative z-score formula.
+mortality[, 2:ncol(mortality)] <- sapply(mortality[, -1], negative_zscore)
+str(mortality)
+# Outlier treatment: According to the CMS documentation, they've performed the outlier treatment for
+# measures at the 0.125th and the 99.875th percentiles
+mortality <- treat_outliers(mortality)
+mort_master <- merge(mort_hosp, mortality, by = "Provider.ID")
+dim(mort_master)
+#[1] 4818   15
+str(mort_master)
+write.csv(mortality, "cleaned_mortality_data.csv")
+
+
+```
+
+
+```{python}
+```
+
+## 3. Safety - Load 2 files "Healthcare Associated Infections - Hospital.csv + Complications - Hospital.csv" into safety dataframe
+
+```{r}
+
+safe_rawdata1 <- mort_rawdata
+safe_rawdata2 <- read.csv("Healthcare Associated Infections - Hospital.csv", stringsAsFactors = FALSE, na.strings = c("Not Available", "Not Applicable"))
+safe_rawdata1 = safe_rawdata1[, c(1:8, 10, 13)]
+safe_rawdata2 = safe_rawdata2[, c(1:8, 10, 12)]
+identical(names(safe_rawdata1), names(safe_rawdata2))
+# [1] TRUE
+safe_rawdata <- rbind(safe_rawdata1, safe_rawdata2)
+safe_meas_list = c("HAI_1_SIR", "HAI_2_SIR", "HAI_3_SIR", "HAI_4_SIR", "HAI_5_SIR", "HAI_6_SIR", "COMP_HIP_KNEE", "PSI_90_SAFETY")
+safe_hosp <- safe_rawdata[, c(1:8)]
+safe_hosp = safe_hosp[!duplicated(safe_hosp),]
+safe_meas <- safe_rawdata[, c(1, 9:10)]
+safe_meas <- subset(safe_meas, Measure.ID %in% safe_meas_list)
+safe_meas$Score <- func_numeric(safe_meas$Score)
+safe_meas_score <- spread(safe_meas, Measure.ID, Score)
+safe_meas_score <- func_rename(safe_meas_score)
+safety <- safe_meas_score
+# The HAI measures are related to infections contracted by the patients during their stay in the hospital
+# we will negative zscore here as well
+safety[, 2:ncol(safety)] <- sapply(safety[, -1], negative_zscore)
+str(safety)
+# Outlier treatment: According to the CMS documentation, they've performed the outlier treatment for
+# measures at the 0.125th and the 99.875th percentiles
+safety <- treat_outliers(safety)
+safe_master <- merge(safe_hosp, safety, "Provider.ID")
+dim(safe_master)
+# [1] 4818   16
+write.csv(safety, "cleaned_safety_data.csv")
+
+```
+
+
+```{python}
+```
+
+## 4. Experience - Load file "HCAHPS - Hospital.csv" into experience data rame
+
+```{r}
+
+expe_rawdata <- read.csv("HCAHPS - Hospital.csv", stringsAsFactors = FALSE, na.strings = c("Not Available", "Not Applicable"))
+expe_meas_list = c("H_CLEAN_LINEAR_SCORE", "H_COMP_1_LINEAR_SCORE", "H_COMP_2_LINEAR_SCORE", "H_COMP_3_LINEAR_SCORE", "H_COMP_4_LINEAR_SCORE", "H_COMP_5_LINEAR_SCORE", "H_COMP_6_LINEAR_SCORE", "H_COMP_7_LINEAR_SCORE", "H_HSP_RATING_LINEAR_SCORE", "H_QUIET_LINEAR_SCORE", "H_RECMND_LINEAR_SCORE")
+names(expe_rawdata)[names(expe_rawdata) == "HCAHPS.Question"] <- "Measure.Name"
+names(expe_rawdata)[names(expe_rawdata) == "HCAHPS.Measure.ID"] <- "Measure.ID"
+names(expe_rawdata)[names(expe_rawdata) == "HCAHPS.Linear.Mean.Value"] <- "Score"
+expe_hosp <- expe_rawdata[, c(1:8)]
+expe_hosp = expe_hosp[!duplicated(expe_hosp),]
+expe_meas <- expe_rawdata[, c(1, 9, 16)]
+expe_meas <- subset(expe_meas, Measure.ID %in% expe_meas_list)
+expe_meas$Score <- func_numeric(expe_meas$Score)
+expe_meas_score <- spread(expe_meas, Measure.ID, Score)
+experience <- expe_meas_score
+# It measures cleanliness, patient hospitality and doctors/staff communication,
+# hospital environment etc. We will use positive zscore here
+experience[, 2:ncol(experience)] <- sapply(experience[, -1], positive_zscore)
+str(experience)
+# Outlier treatment: According to the CMS documentation, they've performed the outlier treatment for
+# measures at the 0.125th and the 99.875th percentiles
+experience <- treat_outliers(experience)
+expe_master <- merge(expe_hosp, experience, by = "Provider.ID")
+dim(expe_master)
+# [1] 4818   19
+write.csv(experience, "cleaned_experience_data.csv")
+
+
+```
+
+
+```{python}
+```
+
+## 5. Medical - Load file "Outpatient Imaging Efficiency - Hopital.csv" into medical data frame
+
+```{r}
+medi_rawdata <- read.csv("Outpatient Imaging Efficiency - Hospital.csv", stringsAsFactors = FALSE, na.strings = c("Not Available", "Not Applicable"))
+medi_meas_list = c("OP_10", "OP_11", "OP_13", "OP_14", "OP_8")
+medi_hosp <- medi_rawdata[, c(1:8)]
+medi_hosp = medi_hosp[!duplicated(medi_hosp),]
+medi_meas <- medi_rawdata[, c(1, 9, 11)]
+medi_meas <- subset(medi_meas, Measure.ID %in% medi_meas_list)
+medi_meas$Score <- as.numeric(medi_meas$Score)
+medi_meas_score <- spread(medi_meas, Measure.ID, Score)
+medi_meas_score <- func_rename(medi_meas_score)
+medical <- medi_meas_score
+# Unecessary usage of imaging tests, lower the better. We will use the negative zscore
+medical[, 2:ncol(medical)] <- sapply(medical[, -1], negative_zscore)
+str(medical)
+# Outlier treatment: According to the CMS documentation, they've performed the outlier treatment for
+# measures at the 0.125th and the 99.875th percentiles
+medical <- treat_outliers(medical)
+medi_master <- merge(medi_hosp, medical, by = "Provider.ID")
+dim(medi_master)
+# [1] 4818   13
+write.csv(medical, "cleaned_medical_data.csv")
+
+
+```
+
+
+```{python}
+```
+
+## 6. Timeliness - Load file "Timely and Effective Care - Hospital.csv" into timeliness data frame
+
+```{r}
+time_rawdata <- read.csv("Timely and Effective Care - Hospital.csv", stringsAsFactors = FALSE, na.strings = c("Not Available", "Not Applicable"))
+time_meas_list = c("ED_1b", "ED_2b", "OP_18b", "OP_20", "OP_21", "OP_3b", "OP_5")
+time_hosp <- time_rawdata[, c(1:8)]
+time_hosp = time_hosp[!duplicated(time_hosp),]
+time_meas <- time_rawdata[, c(1, 10, 12)]
+time_meas <- subset(time_meas, Measure.ID %in% time_meas_list)
+time_meas$Score <- as.numeric(time_meas$Score)
+time_meas_score <- spread(time_meas, Measure.ID, Score)
+time_meas_score <- func_rename(time_meas_score)
+timeliness <- time_meas_score
+# All the measures in timeliness indicate the average time the patient had to wait
+# before being attended by the doctors or concerned specialists. We will use negative zscore
+timeliness[, 2:ncol(timeliness)] <- sapply(timeliness[, -1], negative_zscore)
+str(timeliness)
+# Outlier treatment: According to the CMS documentation, they've performed the outlier treatment for
+# measures at the 0.125th and the 99.875th percentiles
+timeliness <- treat_outliers(timeliness)
+time_master <- merge(time_hosp, timeliness, by = "Provider.ID")
+dim(time_master)
+# [1] 4818   15
+write.csv(timeliness, "cleaned_timeliness_data.csv")
+
+```
+
+
+```{python}
+```
+
+## 7. Timeliness - Load file "Timely and Effective Care - Hospital.csv" into timeliness data frame
+
+```{r}
+effe_rawdata <- time_rawdata
+effe_meas_list = c("CAC_3", "IMM_2", "IMM_3_OP_27_FAC_ADHPCT", "OP_22", "OP_23", "OP_29", "OP_30", "OP_4", "PC_01", "STK_4", "STK_5", "STK_6", "STK_8", "VTE_1", "VTE_2", "VTE_3", "VTE_5", "VTE_6")
+effe_hosp <- effe_rawdata[, c(1:8)]
+effe_hosp = effe_hosp[!duplicated(effe_hosp),]
+effe_meas <- effe_rawdata[, c(1, 10, 12)]
+effe_meas <- subset(effe_meas, Measure.ID %in% effe_meas_list)
+effe_meas$Score <- as.numeric(effe_meas$Score)
+effe_meas_score <- spread(effe_meas, Measure.ID, Score)
+effe_meas_score <- func_rename(effe_meas_score)
+effectiveness <- effe_meas_score
+# Effectiveness has some columns for which the value higher is better, and few the score lower is better
+# We will both postive and negative zscores here for the filtered columns
+positive_measures <- c(2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18)
+negative_measures <- c(5, 10, 19)
+effectiveness[, positive_measures] <- sapply(effectiveness[, positive_measures], positive_zscore)
+effectiveness[, negative_measures] <- sapply(effectiveness[, negative_measures], negative_zscore)
+str(effectiveness)
+# Outlier treatment: According to the CMS documentation, they've performed the outlier treatment for
+# measures at the 0.125th and the 99.875th percentiles
+effectiveness <- treat_outliers(effectiveness)
+effe_master <- merge(effe_hosp, effectiveness, by = "Provider.ID")
+dim(effe_master)
+# [1] 4818   26
+write.csv(effectiveness, "cleaned_effectiveness_data.csv")
+
+
 ```
 
 
@@ -141,48 +343,79 @@ write.csv(readmission, "cleaned_readmission_data.csv")
 ```
 
 ```{r}
+
+merge1 <- merge(read_master, mort_master)
+merge2 <- merge(merge1, safe_master)
+merge3 <- merge(merge2, expe_master)
+merge4 <- merge(merge3, medi_master)
+merge5 <- merge(merge4, time_master)
+merge6 <- merge(merge5, effe_master)
+str(merge6)
+dim(merge6)
+# [1] 4818   72
+
+master_data_x <- merge6
+
+
 ```
 
 
 ```{python}
 ```
 
-```{r}
-```
+############# Raw data is ready with all required 64 measures and 8 general columns ###
 
-
-```{python}
-```
+## 2. Data Cleaning
 
 ```{r}
-```
+## Remove duplicate Data
+master_data_x = master_data_x[!duplicated(master_data_x),]
+dim(master_data_x)  ## No duplicates found
+# [1] 4818 72
 
+## Remove NA Values
+sapply(master_data_x, function(x) sum(length(which(is.na(x)))))
 
-```{python}
-```
+# Provider.ID                Hospital.Name               Address                       City                        State
+# 0                            0                            0                            0                            0
+# ZIP.Code                   County.Name                 Phone.Number                  READM_30_AMI_score          READM_30_CABG_score
+# 0                            0                            0                            2655                         3791
+# READM_30_COPD_score        READM_30_HF_score           READM_30_HIP_KNEE_score       READM_30_HOSP_WIDE_score    READM_30_PN_score
+# 1170                         1168                         2087                         423                          729
+# READM_30_STK_score         MORT_30_AMI_score           MORT_30_CABG_score            MORT_30_COPD_score          MORT_30_HF_score
+# 2210                         2430                         3780                         1227                         1200
+# MORT_30_PN_score           MORT_30_STK_score           PSI_4_SURG_COMP_score         COMP_HIP_KNEE_score         HAI_1_SIR_score
+# 730                         2142                         3000                          2104                         2443
+# HAI_2_SIR_score            HAI_3_SIR_score             HAI_4_SIR_score               HAI_5_SIR_score             HAI_6_SIR_score
+# 1929                         2775                         3962                         2988                         1546
+# PSI_90_SAFETY_score        H_CLEAN_LINEAR_SCORE        H_COMP_1_LINEAR_SCORE         H_COMP_2_LINEAR_SCORE       H_COMP_3_LINEAR_SCORE
+# 1594                         1310                         1310                         1310                         1310
+# H_COMP_4_LINEAR_SCORE      H_COMP_5_LINEAR_SCORE       H_COMP_6_LINEAR_SCORE         H_COMP_7_LINEAR_SCORE       H_HSP_RATING_LINEAR_SCORE
+# 1310                         1310                         1310                         1310                         1310
+# H_QUIET_LINEAR_SCORE       H_RECMND_LINEAR_SCORE       OP_10_score                   OP_11_score                 OP_13_score
+# 1310                         1310                         1189                         1469                         2585
+# OP_14_score                OP_8_score                  ED_1b_score                   ED_2b_score                 OP_18b_score
+# 2514                         3294                         1222                         1238                         1234
+# OP_20_score                OP_21_score                 OP_3b_score                   OP_5_score                  CAC_3_score
+# 1223                         1505                         4425                         2574                         4643
+# IMM_2_score                IMM_3_OP_27_FAC_ADHPCT_score OP_22_score                  OP_23_score                 OP_29_score
+# 1034                          711                         1543                         3608                         2087
+# OP_30_score                OP_4_score                  PC_01_score                   STK_4_score                 STK_5_score
+# 2191                         2599                         2296                         3919                         3276
+# STK_6_score                STK_8_score                  VTE_1_score                  VTE_2_score                 VTE_3_score
+# 2239                         2454                         1200                         1883                         2332
+# VTE_5_score                VTE_6_score
+# 2587                         3560
+# >
 
-```{r}
-```
+sum(sapply(master_data_x, function(x) sum(length(which(is.na(x))))))
+# [1] 131127
 
+## The Score columns are having 131127 NA values, score columns are very important for our further analysis. As these are all independent(X) variables
+## we will deal with the NA cleaning after merging with Dependent variable (ratings- y) in later phase
 
-```{python}
-```
+str(master_data_x)
 
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
 ```
 
 
