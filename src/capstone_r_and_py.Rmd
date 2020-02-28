@@ -154,6 +154,7 @@ str(read_rawdata)
 
 ```{python}
 read_rawdata.head(10)
+read_rawdata.info()
 ```
 
 
@@ -183,17 +184,22 @@ read_meas_list
 
 ```{r}
 read_hosp <- read_rawdata[, c(1:8)]
-read_hosp
+str(read_hosp)
 ```
-
 ```{python}
-read_hosp = read_rawdata[read_meas_list]
-read_hosp
+read_hosp = read_rawdata.iloc[:,0:8]
+read_hosp.head(5)
 ```
 
 
 ```{r}
 read_hosp <- read_hosp[!duplicated(read_hosp),]
+str(read_hosp)
+```
+
+```{python}
+read_hosp = read_hosp.drop_duplicates(keep='first')
+read_hosp
 ```
 
 ```{r}
