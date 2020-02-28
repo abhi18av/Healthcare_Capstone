@@ -3,8 +3,13 @@ title: "capstone_r_and_py"
 output: html_document
 ---
 
+#===================================================
+# Set the current working directory
+#===================================================
+
 ```{r setup, include=FALSE}
-setwd("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/")
+#setwd("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/")
+knitr::opts_knit$set(root.dir = normalizePath("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/"))  # should change the working directory to 'Users/Me/Docs/Proj'
 ```
 
 ```{python}
@@ -13,13 +18,349 @@ os.chdir("/Users/eklavya/projects/education/formalEducation/DataScience/DataScie
 ```
 
 
+#===================================================
+# Libraries to be used
+#===================================================
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(data.table)
+library(corrplot)
+library(gridExtra)
+library(ggthemes)
+```
 
 ```{python}
-abhinav = "abhi18av"
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set_style('whitegrid')
+
+```
+#===================================================
+# Utility functions to be used
+#===================================================
+
+
+```{r}
+# Function to replace "Not Available" to NA's
+replace_NA <- function(x, y, z) {
+  x[which(x == y)] <- z
+  return(x)
+}
+
+func_numeric <- function(x) {
+  x <- as.numeric(x)
+  return(x)
+}
+
+func_rename <- function(x) {
+  x %>% rename_at(vars(-Provider.ID), function(y) paste0(y, "_score"))
+}
+
+# Function to scale the values.
+negative_zscore <- function(i) {
+  return((mean(i, na.rm = T) - i) / (sd(i, na.rm = T)))
+}
+
+positive_zscore <- function(i) {
+  return((i - mean(i, na.rm = T)) / (sd(i, na.rm = T)))
+}
+
+#### Function to treat the outliers
+
+treat_outliers <- function(df) {
+  for (colmn in 2:(ncol(df))) {
+    qtl = quantile(df[, colmn], probs = seq(0, 1, 0.00001), na.rm = T)
+    df[, colmn][which(df[, colmn] <= qtl[0.00125 * length(qtl)])] <- qtl[0.00125 * length(qtl)]
+    df[, colmn][which(df[, colmn] >= qtl[0.99875 * length(qtl)])] <- qtl[0.99875 * length(qtl)]
+  }
+  return(df)
+}
+```
+
+```{python}
+```
+
+#===================================================
+# 1. Readmission - Load "Readmissions and Deaths - Hospital.csv" file into read_raw
+#===================================================
+
+```{r}
+
+read_rawdata <- read.csv("Readmissions and Deaths - Hospital.csv", stringsAsFactors = FALSE, na.strings = c("Not Available", "Not Applicable"))
+dim(read_rawdata)  ## 67452 rows and 18 columns
+#[1] 67452    18
+
+str(read_rawdata)
+unique(read_rawdata$Score)
+
+# We will filter only those columns which are needed as per the mentor.
+read_meas_list = c("READM_30_AMI", "READM_30_CABG", "READM_30_COPD", "READM_30_HF", "READM_30_HIP_KNEE", "READM_30_HOSP_WIDE", "READM_30_PN", "READM_30_STK")
+read_hosp <- read_rawdata[, c(1:8)]
+read_hosp <- read_hosp[!duplicated(read_hosp),]
+read_meas <- read_rawdata[, c(1, 10, 13)]
+read_meas$Score <- func_numeric(read_meas$Score)
+read_meas <- subset(read_meas, Measure.ID %in% read_meas_list)
+str(read_meas)
+read_meas_score <- spread(read_meas, Measure.ID, Score)
+str(read_meas_score)
+read_meas_score <- func_rename(read_meas_score)
+str(read_meas_score)
+readmission <- read_meas_score
+# # We will use negative zscore scaling as high readmissions implies the Hospital is not doing well in terms of patient treatment quality.
+readmission[, 2:ncol(readmission)] <- sapply(readmission[, -1], negative_zscore)
+str(readmission)
+# Outlier treatment: According to the CMS documentation, they've performed the outlier treatment for
+# measures at the 0.125th and the 99.875th percentiles
+readmission <- treat_outliers(readmission)
+read_master <- merge(read_hosp, readmission, by = "Provider.ID")
+dim(read_master)
+# [1] 4818  16
+str(read_master)
+write.csv(readmission, "cleaned_readmission_data.csv")
+
+
 ```
 
 
+```{python}
+```
+
+
+```{r}
+```
+
 
 ```{python}
-print(abhinav)
 ```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
+```{r}
+```
+
+
+```{python}
+```
+
