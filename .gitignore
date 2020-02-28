@@ -5,3 +5,6 @@ data/
 /hospital_data/
 
 /src/*csv
+
+.RData
+.Rhistory
