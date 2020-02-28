@@ -9,8 +9,9 @@ output: html_document
 
 ```{r setup, include=FALSE}
 #setwd("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/")
-knitr::opts_knit$set(root.dir = normalizePath("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/"))  # should change the working directory to 'Users/Me/Docs/Proj'
+knitr::opts_knit$set(root.dir = normalizePath("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/src/"))  # should change the working directory to 'Users/Me/Docs/Proj'
 ```
+
 
 ```{python}
 import os
