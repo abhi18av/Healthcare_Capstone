@@ -1575,7 +1575,16 @@ summary(factor(hospital_ratings$Hospital.Type))
 #             3382                        99                      1337
 
 # Acute care hospitals are the highest in the dataset, followed by Critical Access Hospitals and Childrens hospitals.
+```
 
+
+```{python}
+
+hospital_ratings['Hospital Type'].value_counts()
+```
+
+
+```{r}
 # Let us verify the hospitals ratings for each type for hospitals.
 table(hospital_ratings$Hospital.Type, hospital_ratings$Hospital.overall.rating)
 
@@ -1587,8 +1596,21 @@ table(hospital_ratings$Hospital.Type, hospital_ratings$Hospital.overall.rating)
 # Since the Childrens hospital has no ratings, we will filter these records from the dataset.
 # we will remove the Critical Access Hospitals as well, as there are no ratings for 1 and very few for 5.
 
+```
+
+```{python}
+# TODO
+hospital_ratings[['Hospital Type', 'Hospital overall rating']].value_counts()
+
+```
+
+```{r}
 hospital_ratings <- filter(hospital_ratings, Hospital.Type == "Acute Care Hospitals")
+str(hospital_ratings)
+print_ln()
+
 hospital_ratings$Hospital.Type <- factor(as.character(hospital_ratings$Hospital.Type))
+
 table(hospital_ratings$Hospital.Type, hospital_ratings$Hospital.overall.rating)
 
 #                               1    2    3    4    5
@@ -1604,6 +1626,16 @@ hospital_ratings$Hospital.overall.rating <- func_numeric(hospital_ratings$Hospit
 
 
 ```{python}
+hospital_ratings =  hospital_ratings[hospital_ratings['Hospital Type'] == 'Acute Care Hospitals']
+
+hospital_ratings['Hospital Type'], factors_hospital_type =  pd.factorize(hospital_ratings['Hospital Type'])
+
+hospital_ratings
+print_ln()
+
+
+hospital_ratings['Hospital overall rating'].unique()
+
 ```
 
 ```{r}
@@ -1633,7 +1665,9 @@ dim(hospital_ratings)
 ```{python}
 ```
 
+#=====================================
 # Univariate analysis - Segmented:
+#=====================================
 
 ```{r}
 # Let us Segment across different groups categorical variables and compare their average overall ratings
