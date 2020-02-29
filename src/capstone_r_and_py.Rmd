@@ -1633,10 +1633,12 @@ hospital_ratings['Hospital Type'], factors_hospital_type =  pd.factorize(hospita
 hospital_ratings
 print_ln()
 
+hospital_ratings['Hospital overall rating'].value_counts()
+hospital_ratings['Hospital overall rating'] = func_numeric(hospital_ratings,'Hospital overall rating')
 
-hospital_ratings['Hospital overall rating'].unique()
 
 ```
+
 
 ```{r}
 # Let's check the Ownership type for the hospitals.
@@ -1663,6 +1665,15 @@ dim(hospital_ratings)
 
 
 ```{python}
+
+hospital_ratings['Hospital Ownership'].value_counts()
+
+print_ln()
+
+hospital_ratings = hospital_ratings[hospital_ratings['Hospital Ownership'].notnull()]
+hospital_ratings
+
+
 ```
 
 #=====================================
