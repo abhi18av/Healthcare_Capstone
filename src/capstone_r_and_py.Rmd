@@ -18,6 +18,9 @@ import os
 os.chdir("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/src/")
 ```
 
+```{r}
+" " * 80
+```
 
 #===================================================
 # Libraries to be used
@@ -32,6 +35,13 @@ library(data.table)
 library(corrplot)
 library(gridExtra)
 library(ggthemes)
+
+
+# Util function: line seperator
+print_ln <- function() {
+  cat(  "--------------------------------------------------------------------------------\n"  )
+}
+
 ```
 
 ```{python}
@@ -44,7 +54,7 @@ import warnings
 warnings.filterwarnings('ignore')
 sns.set_style('whitegrid')
 
-# Util fuction: line seperator
+# Util function: line seperator
 def print_ln():
     print('-' * 80, '\n')
 
@@ -142,8 +152,25 @@ treat_outliers <- function(df) {
 ```
 
 ```{python}
-def treat_outliers(df):
-    pass
+
+def subset_by_iqr(df, column, whisker_width=0):
+    # Calculate Q1, Q2 and IQR
+    q1 = df[column].quantile(0.00125)                 
+    q3 = df[column].quantile(0.99875)
+    iqr = q3 - q1
+    # Apply filter with respect to IQR, including optional whiskers
+    filter = (df[column] >= q1 - whisker_width*iqr) & (df[column] <= q3 + whisker_width*iqr)
+    return df.loc[filter][column]                                                     
+
+#df_filtered = subset_by_iqr(df, 'READM_30_STK_score')
+#df_filtered
+
+def treat_outliers(dataframe):
+    df = dataframe.copy()
+    cols = list(df.columns)
+    for col in cols:
+        df[col] = subset_by_iqr(df, col)
+    return df
 
 ```
 
@@ -316,7 +343,7 @@ np.nansum(read_meas_score['READM_30_AMI_score'].unique())
 
 ```{r}
 readmission <- read_meas_score
-# # We will use negative zscore scaling as high readmissions implies the Hospital is not doing well in terms of patient treatment quality.
+# We will use negative zscore scaling as high readmissions implies the Hospital is not doing well in terms of patient treatment quality.
 readmission[, 2:ncol(readmission)] <- sapply(readmission[, -1], negative_zscore)
 str(readmission)
 readmission
@@ -325,35 +352,54 @@ readmission
 
 
 ```{python}
-
-readmission = read_meas_score
-#readmission
-
+readmission = negative_zscore(read_meas_score)
 print_ln()
-readmission = negative_zscore(readmission)
-#print_ln()
-readmission.head()
+readmission
 
 ```
+
+#===============================================
 # Outlier treatment: According to the CMS documentation, they've performed the outlier treatment for
 # measures at the 0.125th and the 99.875th percentiles
+#===============================================
+
 
 ```{r}
 readmission <- treat_outliers(readmission)
+readmission
+```
+
+```{python}
+
+readmission = treat_outliers(df)
+readmission
+```
+
+```{r}
 read_master <- merge(read_hosp, readmission, by = "Provider.ID")
 dim(read_master)
 # [1] 4818  16
+
+print_ln()
+
 str(read_master)
+```
+
+```{python}
+read_master = pd.merge(read_hosp, readmission, on="Provider ID")
+read_master.info()
+print_ln()
+read_master.head()
 ```
 
 ```{r}
 write.csv(readmission, "cleaned_readmission_data.csv")
 
-
 ```
 
 
 ```{python}
+readmission.to_csv("cleaned_readmission_data_py.csv")
 ```
 
 #===================================================
@@ -2926,312 +2972,3 @@ medi_op13_p
 
 
 ############################################## Code ENDS #########################################################
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
-```{r}
-```
-
-
-```{python}
-```
-
