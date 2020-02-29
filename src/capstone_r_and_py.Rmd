@@ -49,6 +49,7 @@ import seaborn as sns
 import warnings
 warnings.filterwarnings('ignore')
 sns.set_style('whitegrid')
+sns.set_context('paper')
 
 # Util function: line seperator
 def print_ln():
@@ -1634,7 +1635,7 @@ hospital_ratings
 print_ln()
 
 hospital_ratings['Hospital overall rating'].value_counts()
-hospital_ratings['Hospital overall rating'] = func_numeric(hospital_ratings,'Hospital overall rating')
+hospital_ratings = func_numeric(hospital_ratings,'Hospital overall rating')
 
 
 ```
@@ -1687,7 +1688,9 @@ avg_by_state <- hospital_ratings %>%
   group_by(State) %>%
   summarise(avg_rating = mean(Hospital.overall.rating, na.rm = T), provider_count = n()) %>%
   arrange(desc(avg_rating))
+
 avg_by_state
+
 head(avg_by_state, 10)
 
 # A tibble: 53 x 3
@@ -1708,12 +1711,24 @@ head(avg_by_state, 10)
 # we see that Indiana has an average of 3.59 and has the highest frequency.
 # We see that Wisconsin has an average of 3.69 and a good count of providers.
 
-
-
 ```
 
 
+
 ```{python}
+
+#hospital_ratings.dtypes
+#print_ln()
+
+hospital_ratings = func_numeric(hospital_ratings, 'Hospital overall rating')
+#hospital_ratings.dtypes
+hospital_ratings[['State', 'Hospital overall rating']]
+print_ln()
+
+avg_by_state = hospital_ratings.groupby(['State'])['Hospital overall rating'].agg({'Hospital overall rating': np.mean })
+
+avg_by_state = avg_by_state.sort_values(by=['Hospital overall rating'], ascending= False).reset_index()
+avg_by_state
 ```
 
 ```{r}
@@ -1728,7 +1743,23 @@ graph_by_prov_state <- head(avg_by_state, 10) %>%
   ggtitle("Average Ratings by State")
 
 graph_by_prov_state
+```
 
+
+```{python}
+
+
+avg_by_state.head(10)
+print_ln()
+
+sns.barplot(x = 'State', y= "Hospital overall rating", data = avg_by_state.head(10), palette = 'hls')
+
+plt.title("Average Ratings by State")
+plt.show()
+```
+
+
+```{r}
 avg_by_hosp_ownership <- hospital_ratings %>%
   group_by(Hospital.Ownership) %>%
   summarise(avg_rating = mean(Hospital.overall.rating, na.rm = T), hospital_count = n()) %>%
@@ -1756,12 +1787,38 @@ graph_by_hosp_owner <- avg_by_hosp_ownership %>%
   geom_bar(stat = "identity") +
   geom_text(size = 2, vjust = -1) +
   theme_classic() +
-  xlab("Hospitals by Onwership") +
+  xlab("Hospitals by Ownership") +
   ylab("Average rating") +
-  ggtitle("Average Ratings by Onwership")
+  ggtitle("Average Ratings by Ownership")
 
 graph_by_hosp_owner
+```
 
+```{python}
+
+hospital_ratings.columns
+
+hospital_ratings[["Hospital Ownership", "Hospital overall rating"]]
+print_ln()
+
+avg_by_hosp_ownership = hospital_ratings.groupby(["Hospital Ownership"])["Hospital overall rating"].agg({"Hospital overall rating": np.mean })
+
+avg_by_hosp_ownership = avg_by_hosp_ownership.sort_values(by=["Hospital overall rating"], ascending= False).reset_index()
+
+avg_by_hosp_ownership.head(10)
+print_ln()
+
+plot = sns.barplot(x = "Hospital Ownership", y= "Hospital overall rating", data = avg_by_hosp_ownership.head(10), palette = 'hls')
+plot.set_xticklabels(plot.get_xticklabels(), rotation=45)
+
+plt.title("Average Ratings by Ownership")
+plt.show()
+
+```
+
+
+
+```{r}
 # we see good average ratings for "Physician" owned hospitals and voluntary non-profit owned hospitals
 # Comparitively low ratings for tribal, Government -local owned hospitals.
 library(cowplot)
@@ -1771,9 +1828,13 @@ grid_plot
 
 ```
 
-
 ```{python}
+# https://jakevdp.github.io/PythonDataScienceHandbook/04.08-multiple-subplots.html
+# https://www.machinelearningplus.com/plots/matplotlib-tutorial-complete-guide-python-plot-examples/
+
 ```
+
+
 
 ```{r}
 # Average of Readmission Ratings
@@ -1808,6 +1869,30 @@ graph_by_readmission <- avg_by_readmission %>%
 
 graph_by_readmission
 
+
+```
+```{python}
+hospital_ratings[["Readmission national comparison", "Hospital overall rating"]]
+print_ln()
+
+avg_by_readmission = hospital_ratings.groupby(["Readmission national comparison"])["Hospital overall rating"].agg({"Hospital overall rating": np.mean })
+
+avg_by_readmission = avg_by_readmission.sort_values(by=["Hospital overall rating"], ascending= False).reset_index()
+
+avg_by_readmission.head(10)
+print_ln()
+# TODO show NAN as well
+
+plot = sns.barplot(x = "Readmission national comparison", y= "Hospital overall rating", data = avg_by_readmission.head(10), palette = 'hls')
+plot.set_xticklabels(plot.get_xticklabels(), rotation=45)
+
+plt.title("Average Ratings by Readmissions")
+plt.show()
+
+```
+
+
+```{r}
 readmission_gp <- round(avg_by_readmission$avg_rating[2] - avg_by_readmission$avg_rating[4], 2)
 
 # Average Mortality ratings
