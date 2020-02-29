@@ -57,7 +57,7 @@ def print_ln():
 
 # Function to create a subset of the dataframe
 def subset(dataframe, col_name, col_names_list):
-    return dataframe.loc[expe_meas[col_name].isin(col_names_list)]
+    return dataframe.loc[dataframe[col_name].isin(col_names_list)]
 
 ```
 #===================================================
@@ -880,9 +880,6 @@ expe_meas = expe_rawdata.iloc[:, [0, 8, 15]]
 expe_meas
 print_ln()
 
-
-subset(expe_meas, 'Measure ID', expe_meas_list)
-
 expe_meas = expe_meas.loc[expe_meas['Measure ID'].isin(expe_meas_list)]
 expe_meas
 expe_meas.dtypes
@@ -922,11 +919,27 @@ experience.to_csv("cleaned_experience_data_py.csv")
 ```{r}
 medi_rawdata <- read.csv("Outpatient Imaging Efficiency - Hospital.csv", stringsAsFactors = FALSE, na.strings = c("Not Available", "Not Applicable"))
 medi_meas_list = c("OP_10", "OP_11", "OP_13", "OP_14", "OP_8")
+
 medi_hosp <- medi_rawdata[, c(1:8)]
+str(medi_hosp)
+print_ln()
+
 medi_hosp = medi_hosp[!duplicated(medi_hosp),]
+str(medi_hosp)
+print_ln()
+
 medi_meas <- medi_rawdata[, c(1, 9, 11)]
+str(medi_meas)
+print_ln()
+
 medi_meas <- subset(medi_meas, Measure.ID %in% medi_meas_list)
+str(medi_meas)
+print_ln()
+
 medi_meas$Score <- as.numeric(medi_meas$Score)
+str(medi_meas)
+print_ln()
+
 medi_meas_score <- spread(medi_meas, Measure.ID, Score)
 medi_meas_score <- func_rename(medi_meas_score)
 medical <- medi_meas_score
@@ -944,10 +957,60 @@ write.csv(medical, "cleaned_medical_data.csv")
 
 ```
 
-
 ```{python}
-```
+medi_rawdata = pd.read_csv("Outpatient Imaging Efficiency - Hospital.csv", encoding="ISO-8859-1",
+                           na_values=["Not Available", "Not Applicable"])
 
+medi_meas_list = ["OP_10", "OP_11", "OP_13", "OP_14", "OP_8"]
+
+medi_hosp = medi_rawdata.iloc[:, 0:8]
+medi_hosp
+print_ln()
+medi_hosp.dtypes
+
+medi_hosp = medi_hosp.drop_duplicates(keep='first')
+medi_hosp
+print_ln()
+medi_hosp.dtypes
+
+medi_meas = medi_rawdata.iloc[:, [0, 8, 10]]
+medi_meas
+print_ln()
+
+medi_meas = subset(medi_meas, 'Measure ID', medi_meas_list)
+medi_meas
+medi_meas.dtypes
+print_ln()
+
+medi_meas = func_numeric(medi_meas, 'Score')
+medi_meas.dtypes
+print_ln()
+
+
+medi_meas_score = medi_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
+medi_meas_score
+print_ln()
+
+medical = medi_meas_score
+medical
+print_ln()
+
+medical = negative_zscore(medical)
+medical
+print_ln()
+
+medical = treat_outliers(medical)
+medical
+print_ln()
+
+medi_master = pd.merge(medi_hosp, medical, on="Provider ID")
+medi_master
+print_ln()
+
+medical.to_csv("cleaned_medical_data_py.csv")
+
+
+```
 ## 6. Timeliness - Load file "Timely and Effective Care - Hospital.csv" into timeliness data frame
 
 ```{r}
