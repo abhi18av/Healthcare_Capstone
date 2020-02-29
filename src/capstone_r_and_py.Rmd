@@ -1448,15 +1448,21 @@ dim(master_data_without_na)  ## 3648 rows and 73 columns
 
 ```{python}
 
-#master_data_with_na <- master_data[is.na(master_data$Hospital.overall.rating),]
+master_data_without_na = master_data[master_data['Hospital overall rating'].notnull()]
+master_data_without_na
+print_ln()
 
-#master_data_without_na <- master_data[!is.na(master_data$Hospital.overall.rating),]
+master_data_without_na
 
-#sapply(master_data_without_na, function(x) sum(is.na(x)))
+master_data_with_na = master_data[~master_data['Hospital overall rating'].notnull()]
+master_data_with_na
+print_ln()
 
-#dim(master_data_without_na)  ## 3648 rows and 73 columns
+np.sum(master_data_without_na.isnull().sum().to_list())
+
 
 ```
+#===========================================
 ## Data Cleaning
 
 ```{r}
@@ -1471,8 +1477,15 @@ output
 
 master_data_without_na <- master_data_without_na[, output]
 str(master_data_without_na)
+```
 
-## Replace NA with median values of the measure
+```{python}
+
+```
+
+
+```{r}
+## Replace NA with median values of the measure - Imputing the data
 names(master_data_without_na)
 meas <- names(master_data_without_na[, 9:ncol(master_data_without_na)])
 for (i in meas) {
