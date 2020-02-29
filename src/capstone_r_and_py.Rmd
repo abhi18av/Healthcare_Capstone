@@ -1144,7 +1144,13 @@ effectiveness <- effe_meas_score
 positive_measures <- c(2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18)
 negative_measures <- c(5, 10, 19)
 effectiveness[, positive_measures] <- sapply(effectiveness[, positive_measures], positive_zscore)
+str(effectiveness[, positive_measures])
+print_ln()
+
 effectiveness[, negative_measures] <- sapply(effectiveness[, negative_measures], negative_zscore)
+str(effectiveness[, negative_measures])
+print_ln()
+
 str(effectiveness)
 # Outlier treatment: According to the CMS documentation, they've performed the outlier treatment for
 # measures at the 0.125th and the 99.875th percentiles
@@ -1159,7 +1165,74 @@ write.csv(effectiveness, "cleaned_effectiveness_data.csv")
 
 
 ```{python}
+
+effe_rawdata = time_rawdata
+effe_rawdata
+print_ln()
+
+effe_meas_list = ["CAC_3", "IMM_2", "IMM_3_OP_27_FAC_ADHPCT", "OP_22", "OP_23", "OP_29", "OP_30", "OP_4", "PC_01", "STK_4", "STK_5", "STK_6", "STK_8", "VTE_1", "VTE_2", "VTE_3", "VTE_5", "VTE_6"]
+
+effe_hosp = effe_rawdata.iloc[:, 0:8]
+effe_hosp
+print_ln()
+effe_hosp.dtypes
+
+
+effe_hosp = effe_hosp.drop_duplicates(keep='first')
+effe_hosp
+print_ln()
+effe_hosp.dtypes
+
+effe_meas = effe_rawdata.iloc[:, [0, 9, 11]]
+effe_meas
+print_ln()
+
+
+effe_meas = subset(effe_meas, 'Measure ID', effe_meas_list)
+effe_meas
+effe_meas.dtypes
+print_ln()
+
+effe_meas = func_numeric(effe_meas, 'Score')
+effe_meas.dtypes
+print_ln()
+
+effe_meas_score = effe_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
+effe_meas_score
+print_ln()
+
+
+effe_meas_score = func_rename(effe_meas_score)
+effe_meas_score
+print_ln()
+
+effectiveness = effe_meas_score
+effectiveness
+print_ln()
+
+positive_measures = [0, 1, 2, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16]
+effectiveness.iloc[:, positive_measures] = positive_zscore(effectiveness.iloc[:, positive_measures])
+effectiveness.iloc[:, positive_measures].columns
+print_ln()
+
+negative_measures = [3, 8, 17]
+effectiveness.iloc[:, negative_measures] = negative_zscore(effectiveness.iloc[:, negative_measures])
+effectiveness.iloc[:, negative_measures].columns
+print_ln()
+
+effectiveness = treat_outliers(effectiveness)
+effectiveness
+print_ln()
+
+effe_master = pd.merge(effe_hosp, effectiveness, on="Provider ID")
+effe_master
+print_ln()
+
+effectiveness.to_csv("cleaned_effectiveness_data_py.csv")
+
+
 ```
+
 
 ```{r}
 
