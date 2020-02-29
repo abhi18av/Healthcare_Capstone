@@ -2137,7 +2137,40 @@ write.csv(correlation_readmission, "correlation_readmission.csv")
 # The correlation measures for READM_30_HIP_KNEE_score is very low accross all the variables.
 # The correlation measures for READM_30_CABG_score is very low accross all the variables.
 # READM_30_HOSP_WIDE_score has very good correlation measures accross all the variables.
+```
 
+```{python}
+# correlation of readmission
+readmission = read_master
+readmission = readmission.drop(readmission.iloc[:, 0:8],  axis = 1) 
+readmission
+
+corr_matrix = readmission.corr().abs()
+
+# Select upper triangle of correlation matrix
+upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(np.bool))
+
+# Find index of feature columns with correlation greater than 0.80
+high_corr_features = [column for column in upper.columns if any(upper[column] > 0.60)]
+
+print("HIGHLY CORRELATED FEATURES IN DATA SET:{}\n\n{}".format(len(high_corr_features), high_corr_features))
+
+```
+
+```{python}
+
+#TODO this causes RStudio to crash
+# figure size
+#plt.figure(figsize=(18,10))
+
+# heatmap
+#sns.heatmap(corr_matrix, cmap="YlGnBu", annot=True)
+#plt.show()
+
+```
+
+
+```{r}
 # Now let us check, how the measures have an impact on the ratings.
 readmission <- readmission[, -c(2:8)]
 readmission_rating <- merge(readmission, master_data_y, by = "Provider.ID")
@@ -2378,7 +2411,15 @@ set.seed(123)
 
 data = sample.split(cleaned_master_data, SplitRatio = 0.3)
 train = subset(cleaned_master_data, data == FALSE)
+
+str(train)
+print_ln()
+
 test = subset(cleaned_master_data, data == TRUE)
+str(test)
+print_ln()
+
+
 dim(train)
 # [1] 2570   54
 
@@ -2386,7 +2427,48 @@ dim(test)
 # [1] 1078   54
 
 str(train)
+```
 
+```{python}
+# split into train and test
+from sklearn.model_selection import train_test_split
+
+#cleaned_master_data['Hospital overall rating'], factors_hospital_overall_rating =  pd.factorize(cleaned_master_data['Hospital overall rating'])
+
+#cleaned_master_data = pd.get_dummies(cleaned_master_data['Hospital overall rating'], prefix='Hospital overall rating', drop_first=True)
+cleaned_master_data
+
+print_ln()
+
+X = cleaned_master_data.loc[:, cleaned_master_data.columns != 'Hospital overall rating']
+y = cleaned_master_data.loc[:, 'Hospital overall rating']
+
+#from sklearn import preprocessing
+#y = preprocessing.label_binarize(y, classes=[ 1, 2, 3, 4, 5])
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                    stratify=y,
+                                                    train_size=0.7,
+                                                    test_size=0.3, random_state=100)
+                                                    
+X_train
+print_ln()
+
+X_test
+print_ln()
+
+y_train
+print_ln()
+
+y_test
+print_ln()
+                                                    
+```
+
+
+
+```{r}
 # We will use mtry=20, we will use ntree = 500,1000 and 1500 as per the mentor's suggestions.
 model_rf1 <- randomForest(Hospital.overall.rating ~ ., data = train, promiximity = FALSE, ntree = 500, mtry = 20, do.trace = TRUE, na.action = na.omit)
 test1 <- predict(model_rf1, newdata = test)
@@ -2436,7 +2518,60 @@ conf_matrix1
 # Balanced Accuracy     0.73151   0.8058   0.8464   0.8604  0.67568
 
 # Accuracy is 79.8%
+```
 
+```{python}
+
+from sklearn.ensemble import RandomForestClassifier
+
+model_rf1= RandomForestClassifier(n_estimators= 100)
+
+#Train the model using the training sets y_pred=clf.predict(X_test)
+model_rf1.fit(X_train, y_train)
+
+y_pred= model_rf1.predict(X_test)
+
+#Import scikit-learn metrics module for accuracy calculation
+from sklearn import metrics
+
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+
+
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import classification_report, confusion_matrix
+
+
+model_rf1_score = cross_val_score(model_rf1, X, y, cv=10)
+
+
+print("=== Confusion Matrix ===")
+print(confusion_matrix(y_test, y_pred))
+print_ln()
+
+print("=== Classification Report ===")
+print(classification_report(y_test, y_pred))
+print_ln()
+
+print("=== All AUC Scores ===")
+print(model_rf1_score)
+
+print_ln()
+
+print("=== Mean AUC Score ===")
+print("Mean AUC Score - Random Forest: ", model_rf1_score.mean())
+print_ln()
+
+
+# TODO 
+# https://towardsdatascience.com/an-implementation-and-explanation-of-the-random-forest-in-python-77bf308a9b76
+```
+
+
+
+```{r}
 model_rf2 <- randomForest(Hospital.overall.rating ~ ., data = train, promiximity = FALSE, ntree = 1000, mtry = 20, do.trace = TRUE, na.action = na.omit)
 test2 <- predict(model_rf2, newdata = test)
 table(test2, test$Hospital.overall.rating)
@@ -2477,7 +2612,57 @@ conf_matrix2
 # Balanced Accuracy     0.70026   0.8005   0.8462   0.8660  0.68919
 
 # Accuracy is 79.7%
+```
 
+```{python}
+
+
+from sklearn.ensemble import RandomForestClassifier
+
+model_rf2= RandomForestClassifier(n_estimators= 1000)
+
+#Train the model using the training sets y_pred=clf.predict(X_test)
+model_rf2.fit(X_train, y_train)
+
+y_pred= model_rf2.predict(X_test)
+
+#Import scikit-learn metrics module for accuracy calculation
+from sklearn import metrics
+
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+
+
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import classification_report, confusion_matrix
+
+
+model_rf2_score = cross_val_score(model_rf2, X, y, cv=10)
+
+
+print("=== Confusion Matrix ===")
+print(confusion_matrix(y_test, y_pred))
+print_ln()
+
+print("=== Classification Report ===")
+print(classification_report(y_test, y_pred))
+print_ln()
+
+print("=== All AUC Scores ===")
+print(model_rf2_score)
+
+print_ln()
+
+print("=== Mean AUC Score ===")
+print("Mean AUC Score - Random Forest: ", model_rf2_score.mean())
+print_ln()
+
+
+```
+
+```{r}
 model_rf3 <- randomForest(Hospital.overall.rating ~ ., data = train, promiximity = FALSE, ntree = 1500, mtry = 20, do.trace = TRUE, na.action = na.omit)
 test3 <- predict(model_rf3, newdata = test)
 table(test3, test$Hospital.overall.rating)
@@ -2560,11 +2745,66 @@ varImpPlot(model_rf3, main = "Variable Importance of measures using MeanDecrease
 
 
 ```{python}
+
+
+from sklearn.ensemble import RandomForestClassifier
+
+model_rf3= RandomForestClassifier(n_estimators= 1500)
+
+#Train the model using the training sets y_pred=clf.predict(X_test)
+model_rf3.fit(X_train, y_train)
+
+y_pred= model_rf3.predict(X_test)
+
+#Import scikit-learn metrics module for accuracy calculation
+from sklearn import metrics
+
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+
+
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import classification_report, confusion_matrix
+
+
+model_rf3_score = cross_val_score(model_rf3, X, y, cv=10)
+
+
+print("=== Confusion Matrix ===")
+print(confusion_matrix(y_test, y_pred))
+print_ln()
+
+print("=== Classification Report ===")
+print(classification_report(y_test, y_pred))
+print_ln()
+
+print("=== All AUC Scores ===")
+print(model_rf2_score)
+
+print_ln()
+
+print("=== Mean AUC Score ===")
+print("Mean AUC Score - Random Forest: ", model_rf3_score.mean())
+print_ln()
+
+
 ```
 
 ######################### Data Modeling and Evaluation End ##########################################
 
+
+
+
+
+
+
+
+
 ##################################### Factor Analysis ###########################
+# TODO https://www.datacamp.com/community/tutorials/introduction-factor-analysis
+
 # We will perform Factor analysis for each of the seven groups.
 
 
@@ -2575,9 +2815,6 @@ varImpPlot(model_rf3, main = "Variable Importance of measures using MeanDecrease
 
 ```
 
-
-```{python}
-```
 
 ```{r}
 
