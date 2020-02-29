@@ -601,15 +601,83 @@ mortality.to_csv("cleaned_mortality_data_py.csv")
 ```{r}
 
 safe_rawdata1 <- mort_rawdata
+str(safe_rawdata1)
+print_ln()
 safe_rawdata2 <- read.csv("Healthcare Associated Infections - Hospital.csv", stringsAsFactors = FALSE, na.strings = c("Not Available", "Not Applicable"))
+str(safe_rawdata2)
+```
+
+```{python}
+safe_rawdata1 = mort_rawdata
+safe_rawdata1
+print_ln()
+
+safe_rawdata2 = pd.read_csv("Healthcare Associated Infections - Hospital.csv", encoding="ISO-8859-1", na_values=["Not Available", "Not Applicable"])
+safe_rawdata2
+print_ln()
+
+
+```
+
+```{r}
 safe_rawdata1 = safe_rawdata1[, c(1:8, 10, 13)]
+names(safe_rawdata1)
+print_ln()
+str(safe_rawdata1)
+print_ln()
+
 safe_rawdata2 = safe_rawdata2[, c(1:8, 10, 12)]
+names(safe_rawdata2)
+print_ln()
+str(safe_rawdata2)
+print_ln()
+```
+
+```{python}
+safe_rawdata1 = safe_rawdata1.iloc[: , [0,1, 2, 3, 4, 5, 6, 7, 9, 12]]
+safe_rawdata1.columns
+print_ln()
+safe_rawdata1
+print_ln()
+
+safe_rawdata2 = safe_rawdata2.iloc[: , [0,1, 2, 3, 4, 5, 6, 7, 9, 11]]
+safe_rawdata2.columns
+print_ln()
+safe_rawdata2
+print_ln()
+
+```
+
+
+
+```{r}
 identical(names(safe_rawdata1), names(safe_rawdata2))
 # [1] TRUE
+```
+
+```{python}
+safe_rawdata1.columns == safe_rawdata2.columns
+```
+
+```{r}
 safe_rawdata <- rbind(safe_rawdata1, safe_rawdata2)
 safe_meas_list = c("HAI_1_SIR", "HAI_2_SIR", "HAI_3_SIR", "HAI_4_SIR", "HAI_5_SIR", "HAI_6_SIR", "COMP_HIP_KNEE", "PSI_90_SAFETY")
 safe_hosp <- safe_rawdata[, c(1:8)]
 safe_hosp = safe_hosp[!duplicated(safe_hosp),]
+str(safe_hosp)
+```
+
+```{python}
+safe_rawdata = pd.concat([safe_rawdata1, safe_rawdata2])
+safe_meas_list =   ["HAI_1_SIR", "HAI_2_SIR", "HAI_3_SIR", "HAI_4_SIR", "HAI_5_SIR", "HAI_6_SIR", "COMP_HIP_KNEE", "PSI_90_SAFETY"]
+safe_hosp = safe_rawdata.iloc[:,0:8]
+safe_hosp = safe_hosp.drop_duplicates(keep='first')
+safe_hosp
+print_ln()
+safe_hosp.dtypes
+```
+
+```{r}
 safe_meas <- safe_rawdata[, c(1, 9:10)]
 safe_meas <- subset(safe_meas, Measure.ID %in% safe_meas_list)
 safe_meas$Score <- func_numeric(safe_meas$Score)
@@ -632,6 +700,17 @@ write.csv(safety, "cleaned_safety_data.csv")
 
 
 ```{python}
+
+safe_meas = mort_rawdata.iloc[: , [0,9,12]]
+safe_meas = safe_meas.loc[safe_meas['Measure ID'].isin(safe_meas_list)]
+safe_meas = func_numeric(safe_meas, 'Score')
+safe_meas_score = safe_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
+safety = safe_meas_score
+safety = negative_zscore(safety)
+safety = treat_outliers(safety)
+safety = pd.merge(mort_hosp, safety, on="Provider ID")
+safety.to_csv("cleaned_safety_data_py.csv")
+
 ```
 
 ## 4. Experience - Load file "HCAHPS - Hospital.csv" into experience data rame
