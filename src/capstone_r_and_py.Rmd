@@ -1548,6 +1548,7 @@ cleaned_master_data <- master_data_without_na
 dim(cleaned_master_data)
 # [1] 3648   54
 
+write.csv(cleaned_master_data, "cleaned_master_data.csv")
 
 ```
 
@@ -1558,6 +1559,7 @@ cleaned_master_data = master_data_without_na
 cleaned_master_data
 print_ln()
 
+cleaned_master_data.to_csv("cleaned_master_data_py.csv")
 
 ```
 
