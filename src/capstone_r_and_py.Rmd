@@ -1326,6 +1326,26 @@ sapply(master_data_x, function(x) sum(length(which(is.na(x)))))
 # 2587                         3560
 # >
 
+```
+
+
+
+```{python}
+
+master_data_x = master_data_x.drop_duplicates(keep='first')
+master_data_x
+print_ln()
+
+master_data_x.isnull().sum() 
+
+columns_with_missing_data = round(100 * (master_data_x.isnull().sum() / len(master_data_x.index)), 2)
+columns_with_missing_data[columns_with_missing_data > 30].plot(kind='bar')
+plt.show()
+
+```
+
+
+```{r}
 sum(sapply(master_data_x, function(x) sum(length(which(is.na(x))))))
 # [1] 131127
 
@@ -1338,9 +1358,16 @@ str(master_data_x)
 
 
 ```{python}
+
+np.sum(master_data_x.isnull().sum().to_list())
+print_ln()
+
+master_data_x
 ```
+
 ##############################
-## Load Dependent Variable data from Hospital Genral Information.csv file
+
+## Load Dependent Variable data from Hospital General Information.csv file
 
 ```{r}
 
@@ -1348,6 +1375,7 @@ hospital_ratings <- read.csv("Hospital General Information.csv", stringsAsFactor
 dim(hospital_ratings)  ## 4818 rows and 28 columns  - For each hospital one row is existing
 # [1] 4818   28
 str(hospital_ratings)
+print_ln()
 
 master_data_y <- hospital_ratings
 
@@ -1356,8 +1384,9 @@ sum(is.na(hospital_ratings$Hospital.overall.rating))  ## 321 records having NA v
 
 # We need only the Provide.ID and Hospital.overall.rating columns
 master_data_y <- master_data_y[, c(1, 13)]
-str(master_data_y)
 dim(master_data_y)  ## 4818 rows and 2 columns (Provider id , Hospital CMS rating)
+str(master_data_y)
+print_ln()
 # [1] 4818 2
 
 ## Merge X (independent) & Y (dependent) variables to one using Provider id
@@ -1372,6 +1401,25 @@ dim(master_data) ## 4818 rows & 73 columns
 
 
 ```{python}
+hospital_ratings = pd.read_csv("Hospital General Information.csv", encoding="ISO-8859-1", na_values=["Not Available", "Not Applicable"])
+hospital_ratings.columns
+print_ln()
+hospital_ratings
+print_ln()
+
+master_data_y = hospital_ratings
+
+hospital_ratings[['Hospital overall rating']].isnull().sum()
+
+master_data_y = master_data_y.iloc[:,[0, 12]]
+master_data_y.columns
+print_ln()
+
+master_data = pd.merge(master_data_x, master_data_y, on= "Provider ID")
+master_data
+print_ln()
+
+
 ```
 
 ### Data cleaning Part 2
@@ -1399,6 +1447,15 @@ dim(master_data_without_na)  ## 3648 rows and 73 columns
 
 
 ```{python}
+
+#master_data_with_na <- master_data[is.na(master_data$Hospital.overall.rating),]
+
+#master_data_without_na <- master_data[!is.na(master_data$Hospital.overall.rating),]
+
+#sapply(master_data_without_na, function(x) sum(is.na(x)))
+
+#dim(master_data_without_na)  ## 3648 rows and 73 columns
+
 ```
 ## Data Cleaning
 
