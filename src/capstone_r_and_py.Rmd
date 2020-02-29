@@ -133,13 +133,16 @@ def negative_zscore(dataframe):
     cols = list(df.columns)
     for col in cols:
         df[col] = - (df[col] - df[col].mean())/df[col].std(ddof=0)
-#    df[col] = (df[col].mean())/df[col].std(ddof=0)
     return df
 
 
-def positive_zscore(df):
-    pass
-#    return ((df - df.mean()) / df.std(ddof=0))
+def positive_zscore(dataframe):
+    df = dataframe.copy()
+    cols = list(df.columns)
+    for col in cols:
+        df[col] = (df[col] - df[col].mean())/df[col].std(ddof=0)
+    return df
+
 
 ```
 
@@ -161,12 +164,12 @@ treat_outliers <- function(df) {
 
 def subset_by_iqr(df, column, whisker_width=0):
     # Calculate Q1, Q2 and IQR
-    q1 = df[column].quantile(0.00125)                 
+    q1 = df[column].quantile(0.00125)
     q3 = df[column].quantile(0.99875)
     iqr = q3 - q1
     # Apply filter with respect to IQR, including optional whiskers
     filter = (df[column] >= q1 - whisker_width*iqr) & (df[column] <= q3 + whisker_width*iqr)
-    return df.loc[filter][column]                                                     
+    return df.loc[filter][column]
 
 #df_filtered = subset_by_iqr(df, 'READM_30_STK_score')
 #df_filtered
@@ -848,11 +851,11 @@ expe_rawdata
 expe_rawdata.columns
 print_ln()
 
-expe_new_col_names = {"HCAHPS.Question": "Measure.Name",
-                      "HCAHPS.Measure.ID": "Measure.ID",
-                      "HCAHPS.Linear.Mean.Value": "Score"}
+expe_new_col_names = {"HCAHPS Question": "Measure Name",
+                      "HCAHPS Measure ID": "Measure ID",
+                      "HCAHPS Linear Mean Value": "Score"}
 
-expe_rawdata= expe_rawdata.rename(columns=expe_new_col_names)
+expe_rawdata = expe_rawdata.rename(columns=expe_new_col_names)
 expe_rawdata.columns
 print_ln()
 
@@ -890,6 +893,7 @@ expe_meas.dtypes
 print_ln()
 
 expe_meas_score = expe_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
+expe_meas_score.dtypes
 expe_meas_score
 print_ln()
 
@@ -897,7 +901,7 @@ experience = expe_meas_score
 experience
 print_ln()
 
-experience = negative_zscore(experience)
+experience = positive_zscore(experience)
 experience
 print_ln()
 
