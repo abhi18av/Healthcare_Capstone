@@ -100,7 +100,7 @@ func_rename <- function(x) {
 ```
 
 ```{python}
-def rename_columns(df):
+def func_rename(df):
     old_col_names = df.columns.to_list()
     new_col_names = []
     for a_col_name in old_col_names:
@@ -531,6 +531,10 @@ str(mort_meas_score)
 
 ```{python}
 
+mort_meas_score = func_rename(mort_meas_score)
+mort_meas_score
+print_ln()
+
 mort_meas_score = mort_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
 print_ln()
 mort_meas_score.columns
@@ -733,6 +737,10 @@ safe_meas = func_numeric(safe_meas, 'Score')
 safe_meas.dtypes
 print_ln()
 
+safe_meas_score = func_rename(safe_meas_score)
+safe_meas_score
+print_ln()
+
 
 safe_meas_score = safe_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
 safe_meas_score
@@ -894,6 +902,12 @@ expe_meas_score.dtypes
 expe_meas_score
 print_ln()
 
+
+expe_meas_score = func_rename(expe_meas_score)
+expe_meas_score
+print_ln()
+
+
 experience = expe_meas_score
 experience
 print_ln()
@@ -991,6 +1005,11 @@ medi_meas_score = medi_meas.pivot(index='Provider ID', columns='Measure ID', val
 medi_meas_score
 print_ln()
 
+medi_meas_score = func_rename(medi_meas_score)
+medi_meas_score
+print_ln()
+
+
 medical = medi_meas_score
 medical
 print_ln()
@@ -1028,9 +1047,13 @@ timeliness <- time_meas_score
 # before being attended by the doctors or concerned specialists. We will use negative zscore
 timeliness[, 2:ncol(timeliness)] <- sapply(timeliness[, -1], negative_zscore)
 str(timeliness)
+print_ln()
 # Outlier treatment: According to the CMS documentation, they've performed the outlier treatment for
 # measures at the 0.125th and the 99.875th percentiles
 timeliness <- treat_outliers(timeliness)
+str(timeliness)
+print_ln()
+
 time_master <- merge(time_hosp, timeliness, by = "Provider.ID")
 dim(time_master)
 # [1] 4818   15
@@ -1040,6 +1063,67 @@ write.csv(timeliness, "cleaned_timeliness_data.csv")
 
 
 ```{python}
+
+time_rawdata = pd.read_csv("Timely and Effective Care - Hospital.csv", encoding="ISO-8859-1",
+                           na_values=["Not Available", "Not Applicable"])
+time_rawdata
+print_ln()
+
+time_meas_list = ["ED_1b", "ED_2b", "OP_18b", "OP_20", "OP_21", "OP_3b", "OP_5"]
+
+time_hosp = time_rawdata.iloc[:, 0:8]
+time_hosp
+print_ln()
+time_hosp.dtypes
+
+
+time_hosp = time_hosp.drop_duplicates(keep='first')
+time_hosp
+print_ln()
+time_hosp.dtypes
+
+time_meas = time_rawdata.iloc[:, [0, 9, 11]]
+time_meas
+print_ln()
+
+
+time_meas = subset(time_meas, 'Measure ID', time_meas_list)
+time_meas
+time_meas.dtypes
+print_ln()
+
+time_meas = func_numeric(time_meas, 'Score')
+time_meas.dtypes
+print_ln()
+
+time_meas_score = time_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
+time_meas_score
+print_ln()
+
+time_meas_score = func_rename(time_meas_score)
+time_meas_score
+print_ln()
+
+timeliness = time_meas_score
+timeliness
+print_ln()
+
+timeliness = negative_zscore(timeliness)
+timeliness
+print_ln()
+
+timeliness = treat_outliers(timeliness)
+timeliness
+print_ln()
+
+time_master = pd.merge(time_hosp, timeliness, on="Provider ID")
+time_master
+print_ln()
+
+timeliness.to_csv("cleaned_timeliness_data_py.csv")
+
+
+
 ```
 
 ## 7. Timeliness - Load file "Timely and Effective Care - Hospital.csv" into timeliness data frame
