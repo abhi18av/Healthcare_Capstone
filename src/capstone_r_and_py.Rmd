@@ -337,6 +337,7 @@ str(read_meas_score)
 ```{python}
 read_meas_score =  rename_columns(read_meas_score)
 read_meas_score
+print_ln()
 
 ```
 ```{r}
@@ -531,12 +532,16 @@ str(mort_meas_score)
 
 ```{python}
 
+
+
+mort_meas_score = mort_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
+mort_meas_score
+print_ln()
+
 mort_meas_score = func_rename(mort_meas_score)
 mort_meas_score
 print_ln()
 
-mort_meas_score = mort_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
-print_ln()
 mort_meas_score.columns
 print_ln()
 mort_meas_score
@@ -737,12 +742,11 @@ safe_meas = func_numeric(safe_meas, 'Score')
 safe_meas.dtypes
 print_ln()
 
-safe_meas_score = func_rename(safe_meas_score)
+safe_meas_score = safe_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
 safe_meas_score
 print_ln()
 
-
-safe_meas_score = safe_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
+safe_meas_score = func_rename(safe_meas_score)
 safe_meas_score
 print_ln()
 
@@ -1233,6 +1237,7 @@ effectiveness.to_csv("cleaned_effectiveness_data_py.csv")
 
 ```
 
+## Create a master dataframe from the cleaned group datasets
 
 ```{r}
 
@@ -1248,12 +1253,33 @@ dim(merge6)
 
 master_data_x <- merge6
 
+write.csv(master_data_x, "cleaned_master_data_x.csv")
 
 ```
-
 
 ```{python}
+#
+
+merge1 = pd.merge(read_master, mort_master)
+merge2 = pd.merge(merge1, safe_master)
+merge3 = pd.merge(merge2, expe_master)
+merge4 = pd.merge(merge3, medi_master)
+merge5 = pd.merge(merge4, time_master)
+merge6 = pd.merge(merge5, effe_master)
+
+print(merge6.columns.to_list)
+print_ln()
+
+merge6
+print_ln()
+
+master_data_x = merge6
+
+master_data_x.to_csv("cleaned_master_data_x_py.csv")
+
+
 ```
+
 
 ############# Raw data is ready with all required 64 measures and 8 general columns ###
 
