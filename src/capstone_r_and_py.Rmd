@@ -409,12 +409,72 @@ readmission.to_csv("cleaned_readmission_data_py.csv")
 ```{r}
 mort_rawdata1 <- read_rawdata
 mort_rawdata2 <- read.csv("Complications - Hospital.csv", stringsAsFactors = FALSE, na.strings = c("Not Available", "Not Applicable"))
+
+names(mort_rawdata2)
+print_ln()
+
 identical(names(mort_rawdata1), names(mort_rawdata2))
 # [1] TRUE
+```
+
+```{python}
+mort_rawdata1 = read_rawdata
+mort_rawdata1.shape
+print_ln()
+
+mort_rawdata2 = pd.read_csv("Complications - Hospital.csv", encoding="ISO-8859-1", na_values=["Not Available", "Not Applicable"])
+mort_rawdata2.shape
+print_ln()
+
+mort_rawdata2.columns
+mort_rawdata2.columns
+print_ln()
+
+mort_rawdata1.columns == mort_rawdata2.columns
+```
+
+
+```{r}
 mort_rawdata <- rbind(mort_rawdata1, mort_rawdata2)
+
+str(mort_rawdata)
+
+print_ln()
+mort_rawdata
+```
+```{python}
+
+mort_rawdata = pd.concat([mort_rawdata1, mort_rawdata2])
+mort_rawdata.shape
+print_ln()
+
+
+mort_rawdata
+```
+
+```{r}
 mort_meas_list = c("MORT_30_AMI", "MORT_30_CABG", "MORT_30_COPD", "MORT_30_HF", "MORT_30_PN", "MORT_30_STK", "PSI_4_SURG_COMP")
 mort_hosp <- mort_rawdata[, c(1:8)]
 mort_hosp = mort_hosp[!duplicated(mort_hosp),]
+str(mort_hosp)
+```
+
+```{python}
+mort_meas_list =   ["MORT_30_AMI", "MORT_30_CABG", "MORT_30_COPD", "MORT_30_HF", "MORT_30_PN", "MORT_30_STK", "PSI_4_SURG_COMP"]
+mort_meas_list
+print_ln()
+
+mort_hosp = mort_rawdata.iloc[:,0:8]
+
+mort_hosp = mort_hosp.drop_duplicates(keep='first')
+mort_hosp
+print_ln()
+
+mort_hosp.dtypes
+```
+
+
+```{r}
 mort_meas <- mort_rawdata[, c(1, 10, 13)]
 mort_meas <- subset(mort_meas, Measure.ID %in% mort_meas_list)
 mort_meas$Score <- func_numeric(mort_meas$Score)
