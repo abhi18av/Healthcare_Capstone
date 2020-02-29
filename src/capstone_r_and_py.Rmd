@@ -18,10 +18,6 @@ import os
 os.chdir("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/src/")
 ```
 
-```{r}
-" " * 80
-```
-
 #===================================================
 # Libraries to be used
 #===================================================
@@ -84,6 +80,11 @@ func_numeric <- function(x) {
 ```
 
 ```{python}
+
+def func_numeric(df, col_name):
+    df[col_name] = df[col_name].astype(float)
+    return df
+
 ```
 
 ```{r}
@@ -366,12 +367,14 @@ readmission
 
 ```{r}
 readmission <- treat_outliers(readmission)
+str(readmission)
+print_ln()
 readmission
 ```
 
 ```{python}
 
-readmission = treat_outliers(df)
+readmission = treat_outliers(readmission)
 readmission
 ```
 
@@ -476,30 +479,121 @@ mort_hosp.dtypes
 
 ```{r}
 mort_meas <- mort_rawdata[, c(1, 10, 13)]
+str(mort_meas)
+```
+
+```{python}
+mort_meas = mort_rawdata.iloc[: , [0,9,12]]
+mort_meas.dtypes
+print_ln()
+mort_meas
+```
+
+```{r}
 mort_meas <- subset(mort_meas, Measure.ID %in% mort_meas_list)
+str(mort_meas)
+print_ln()
+
 mort_meas$Score <- func_numeric(mort_meas$Score)
-mort_meas_score <- spread(mort_meas, Measure.ID, Score)
-mort_meas_score <- func_rename(mort_meas_score)
-str(mort_meas_score)
-mortality <- mort_meas_score
-# Mortality indicates the death rate, higher the number worser is the hospital or provider.
-# Since it is related to death rate we will use negative z-score formula.
-mortality[, 2:ncol(mortality)] <- sapply(mortality[, -1], negative_zscore)
-str(mortality)
-# Outlier treatment: According to the CMS documentation, they've performed the outlier treatment for
-# measures at the 0.125th and the 99.875th percentiles
-mortality <- treat_outliers(mortality)
-mort_master <- merge(mort_hosp, mortality, by = "Provider.ID")
-dim(mort_master)
-#[1] 4818   15
-str(mort_master)
-write.csv(mortality, "cleaned_mortality_data.csv")
+str(mort_meas)
+print_ln()
+```
+
+```{python}
+mort_meas = mort_meas.loc[mort_meas['Measure ID'].isin(mort_meas_list)]
+mort_meas
+print_ln()
+
+mort_meas.dtypes
+print_ln()
+
+mort_meas = func_numeric(mort_meas, 'Score')
+mort_meas.dtypes
+print_ln()
 
 
 ```
 
 
+```{r}
+mort_meas_score <- spread(mort_meas, Measure.ID, Score)
+mort_meas_score <- func_rename(mort_meas_score)
+str(mort_meas_score)
+```
+
 ```{python}
+
+mort_meas_score = mort_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
+print_ln()
+mort_meas_score.columns
+print_ln()
+mort_meas_score
+print_ln()
+mort_meas_score.dtypes
+print_ln()
+mort_meas_score.info()
+
+```
+
+
+
+```{r}
+mortality <- mort_meas_score
+str(mortality)
+print_ln()
+# Mortality indicates the death rate, higher the number worser is the hospital or provider.
+# Since it is related to death rate we will use negative z-score formula.
+mortality[, 2:ncol(mortality)] <- sapply(mortality[, -1], negative_zscore)
+str(mortality)
+```
+
+
+```{python}
+mortality = mort_meas_score
+mortality
+print_ln()
+
+mortality = negative_zscore(mortality)
+mortality
+print_ln()
+
+
+```
+
+
+```{r}
+# Outlier treatment: According to the CMS documentation, they've performed the outlier treatment for
+# measures at the 0.125th and the 99.875th percentiles
+mortality <- treat_outliers(mortality)
+str(mortality)
+print_ln()
+
+mort_master <- merge(mort_hosp, mortality, by = "Provider.ID")
+str(mort_master)
+print_ln()
+
+dim(mort_master)
+#[1] 4818   15
+print_ln()
+
+write.csv(mortality, "cleaned_mortality_data.csv")
+
+```
+
+
+```{python}
+
+mortality = treat_outliers(mortality)
+mortality
+print_ln()
+
+mort_master = pd.merge(mort_hosp, mortality, on="Provider ID")
+mort_master.info()
+print_ln()
+mort_master.head()
+
+mortality.to_csv("cleaned_mortality_data_py.csv")
+
 ```
 
 ## 3. Safety - Load 2 files "Healthcare Associated Infections - Hospital.csv + Complications - Hospital.csv" into safety dataframe
