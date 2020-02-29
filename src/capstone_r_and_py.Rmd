@@ -54,6 +54,11 @@ sns.set_style('whitegrid')
 def print_ln():
     print('-' * 80, '\n')
 
+
+# Function to create a subset of the dataframe
+def subset(dataframe, col_name, col_names_list):
+    return dataframe.loc[expe_meas[col_name].isin(col_names_list)]
+
 ```
 #===================================================
 # Utility functions to be used
@@ -128,13 +133,16 @@ def negative_zscore(dataframe):
     cols = list(df.columns)
     for col in cols:
         df[col] = - (df[col] - df[col].mean())/df[col].std(ddof=0)
-#    df[col] = (df[col].mean())/df[col].std(ddof=0)
     return df
 
 
-def positive_zscore(df):
-    pass
-#    return ((df - df.mean()) / df.std(ddof=0))
+def positive_zscore(dataframe):
+    df = dataframe.copy()
+    cols = list(df.columns)
+    for col in cols:
+        df[col] = (df[col] - df[col].mean())/df[col].std(ddof=0)
+    return df
+
 
 ```
 
@@ -156,12 +164,12 @@ treat_outliers <- function(df) {
 
 def subset_by_iqr(df, column, whisker_width=0):
     # Calculate Q1, Q2 and IQR
-    q1 = df[column].quantile(0.00125)                 
+    q1 = df[column].quantile(0.00125)
     q3 = df[column].quantile(0.99875)
     iqr = q3 - q1
     # Apply filter with respect to IQR, including optional whiskers
     filter = (df[column] >= q1 - whisker_width*iqr) & (df[column] <= q3 + whisker_width*iqr)
-    return df.loc[filter][column]                                                     
+    return df.loc[filter][column]
 
 #df_filtered = subset_by_iqr(df, 'READM_30_STK_score')
 #df_filtered
@@ -783,17 +791,42 @@ safety.to_csv("cleaned_safety_data_py.csv")
 ```{r}
 
 expe_rawdata <- read.csv("HCAHPS - Hospital.csv", stringsAsFactors = FALSE, na.strings = c("Not Available", "Not Applicable"))
+str(expe_rawdata)
+print_ln()
+
 expe_meas_list = c("H_CLEAN_LINEAR_SCORE", "H_COMP_1_LINEAR_SCORE", "H_COMP_2_LINEAR_SCORE", "H_COMP_3_LINEAR_SCORE", "H_COMP_4_LINEAR_SCORE", "H_COMP_5_LINEAR_SCORE", "H_COMP_6_LINEAR_SCORE", "H_COMP_7_LINEAR_SCORE", "H_HSP_RATING_LINEAR_SCORE", "H_QUIET_LINEAR_SCORE", "H_RECMND_LINEAR_SCORE")
+
 names(expe_rawdata)[names(expe_rawdata) == "HCAHPS.Question"] <- "Measure.Name"
 names(expe_rawdata)[names(expe_rawdata) == "HCAHPS.Measure.ID"] <- "Measure.ID"
 names(expe_rawdata)[names(expe_rawdata) == "HCAHPS.Linear.Mean.Value"] <- "Score"
+
 expe_hosp <- expe_rawdata[, c(1:8)]
+str(expe_hosp)
+print_ln()
+
 expe_hosp = expe_hosp[!duplicated(expe_hosp),]
+str(expe_hosp)
+print_ln()
+
 expe_meas <- expe_rawdata[, c(1, 9, 16)]
+str(expe_meas)
+print_ln()
+
 expe_meas <- subset(expe_meas, Measure.ID %in% expe_meas_list)
+str(expe_meas)
+print_ln()
+
 expe_meas$Score <- func_numeric(expe_meas$Score)
+
 expe_meas_score <- spread(expe_meas, Measure.ID, Score)
+str(expe_meas_score)
+print_ln()
+
 experience <- expe_meas_score
+str(experience)
+print_ln()
+
+
 # It measures cleanliness, patient hospitality and doctors/staff communication,
 # hospital environment etc. We will use positive zscore here
 experience[, 2:ncol(experience)] <- sapply(experience[, -1], positive_zscore)
@@ -811,6 +844,77 @@ write.csv(experience, "cleaned_experience_data.csv")
 
 
 ```{python}
+
+expe_rawdata = pd.read_csv("HCAHPS - Hospital.csv", encoding="ISO-8859-1",
+                           na_values=["Not Available", "Not Applicable"])
+expe_rawdata
+expe_rawdata.columns
+print_ln()
+
+expe_new_col_names = {"HCAHPS Question": "Measure Name",
+                      "HCAHPS Measure ID": "Measure ID",
+                      "HCAHPS Linear Mean Value": "Score"}
+
+expe_rawdata = expe_rawdata.rename(columns=expe_new_col_names)
+expe_rawdata.columns
+print_ln()
+
+
+expe_meas_list = ["H_CLEAN_LINEAR_SCORE", "H_COMP_1_LINEAR_SCORE", "H_COMP_2_LINEAR_SCORE", "H_COMP_3_LINEAR_SCORE",
+                  "H_COMP_4_LINEAR_SCORE", "H_COMP_5_LINEAR_SCORE", "H_COMP_6_LINEAR_SCORE", "H_COMP_7_LINEAR_SCORE",
+                  "H_HSP_RATING_LINEAR_SCORE", "H_QUIET_LINEAR_SCORE", "H_RECMND_LINEAR_SCORE"]
+
+
+expe_hosp = expe_rawdata.iloc[:, 0:8]
+expe_hosp
+print_ln()
+expe_hosp.dtypes
+
+
+expe_hosp = expe_hosp.drop_duplicates(keep='first')
+expe_hosp
+print_ln()
+expe_hosp.dtypes
+
+expe_meas = expe_rawdata.iloc[:, [0, 8, 15]]
+expe_meas
+print_ln()
+
+
+subset(expe_meas, 'Measure ID', expe_meas_list)
+
+expe_meas = expe_meas.loc[expe_meas['Measure ID'].isin(expe_meas_list)]
+expe_meas
+expe_meas.dtypes
+print_ln()
+
+expe_meas = func_numeric(expe_meas, 'Score')
+expe_meas.dtypes
+print_ln()
+
+expe_meas_score = expe_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
+expe_meas_score.dtypes
+expe_meas_score
+print_ln()
+
+experience = expe_meas_score
+experience
+print_ln()
+
+experience = positive_zscore(experience)
+experience
+print_ln()
+
+experience = treat_outliers(experience)
+experience
+print_ln()
+
+expe_master = pd.merge(expe_hosp, experience, on="Provider ID")
+expe_master
+print_ln()
+
+experience.to_csv("cleaned_experience_data_py.csv")
+
 ```
 
 ## 5. Medical - Load file "Outpatient Imaging Efficiency - Hopital.csv" into medical data frame
