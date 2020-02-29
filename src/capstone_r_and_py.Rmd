@@ -678,20 +678,80 @@ safe_hosp.dtypes
 ```
 
 ```{r}
+names(safe_rawdata)
+print_ln()
+
 safe_meas <- safe_rawdata[, c(1, 9:10)]
+str(safe_meas)
+print_ln()
+
 safe_meas <- subset(safe_meas, Measure.ID %in% safe_meas_list)
+str(safe_meas)
+print_ln()
+
 safe_meas$Score <- func_numeric(safe_meas$Score)
+str(safe_meas)
+print_ln()
+
 safe_meas_score <- spread(safe_meas, Measure.ID, Score)
+str(safe_meas_score)
+print_ln()
+
 safe_meas_score <- func_rename(safe_meas_score)
+str(safe_meas_score)
+print_ln()
+
+
 safety <- safe_meas_score
+str(safety)
+print_ln()
+
+```
+
+```{python}
+safe_rawdata.columns
+print_ln()
+
+safe_meas = safe_rawdata.iloc[: , [0,8,9]]
+safe_meas
+print_ln()
+
+safe_meas = safe_meas.loc[safe_meas['Measure ID'].isin(safe_meas_list)]
+safe_meas
+safe_meas.dtypes
+print_ln()
+
+safe_meas = func_numeric(safe_meas, 'Score')
+safe_meas.dtypes
+print_ln()
+
+
+safe_meas_score = safe_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
+safe_meas_score
+print_ln()
+
+safety = safe_meas_score
+safety
+print_ln()
+
+```
+
+```{r}
 # The HAI measures are related to infections contracted by the patients during their stay in the hospital
 # we will negative zscore here as well
 safety[, 2:ncol(safety)] <- sapply(safety[, -1], negative_zscore)
 str(safety)
+print_ln()
 # Outlier treatment: According to the CMS documentation, they've performed the outlier treatment for
 # measures at the 0.125th and the 99.875th percentiles
 safety <- treat_outliers(safety)
+str(safety)
+print_ln()
+
 safe_master <- merge(safe_hosp, safety, "Provider.ID")
+str(safe_master)
+print_ln()
+
 dim(safe_master)
 # [1] 4818   16
 write.csv(safety, "cleaned_safety_data.csv")
@@ -701,14 +761,19 @@ write.csv(safety, "cleaned_safety_data.csv")
 
 ```{python}
 
-safe_meas = mort_rawdata.iloc[: , [0,9,12]]
-safe_meas = safe_meas.loc[safe_meas['Measure ID'].isin(safe_meas_list)]
-safe_meas = func_numeric(safe_meas, 'Score')
-safe_meas_score = safe_meas.pivot(index='Provider ID', columns='Measure ID', values='Score')
-safety = safe_meas_score
+
 safety = negative_zscore(safety)
+safety
+print_ln()
+
 safety = treat_outliers(safety)
-safety = pd.merge(mort_hosp, safety, on="Provider ID")
+safety
+print_ln()
+
+safe_master = pd.merge(mort_hosp, safety, on="Provider ID")
+safe_master
+print_ln()
+
 safety.to_csv("cleaned_safety_data_py.csv")
 
 ```
