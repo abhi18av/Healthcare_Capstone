@@ -1501,8 +1501,22 @@ for (i in meas) {
   print(median(master_data_without_na[, i], na.rm = TRUE))
   med <- median(master_data_without_na[, i], na.rm = TRUE)
   master_data_without_na[i][is.na(master_data_without_na[i])] = med
+  print_ln()
 }
+```
 
+
+```{python}
+
+# Impute only relevant numerical columns
+master_data_without_na.iloc[ : , 8:] =  master_data_without_na.iloc[ : , 8:].apply(lambda x: x.fillna(x.median()), axis=0)
+
+master_data_without_na
+
+```
+
+
+```{r}
 ## check for NA values after replacing NA with Median
 sapply(master_data_without_na, function(x) sum(is.na(x)))
 
@@ -1511,10 +1525,25 @@ sapply(master_data_without_na, function(x) sum(is.na(x)))
 dim(master_data_without_na)
 # [1] 3648   61
 str(master_data_without_na)
+```
 
+
+```{python}
+
+master_data_without_na.isnull().sum()
+
+```
+
+
+```{r}
 ## Remove hospital information which is not required
 master_data_without_na <- master_data_without_na[, -c(2:8)]
+names(master_data_without_na)
+print_ln()
+
 master_data_without_na$Hospital.overall.rating <- as.factor(master_data_without_na$Hospital.overall.rating)
+str(master_data_without_na)
+
 cleaned_master_data <- master_data_without_na
 dim(cleaned_master_data)
 # [1] 3648   54
@@ -1522,8 +1551,14 @@ dim(cleaned_master_data)
 
 ```
 
-
 ```{python}
+master_data_without_na = master_data_without_na.drop(master_data_without_na.iloc[:, 1:8],  axis = 1) 
+master_data_without_na['Hospital overall rating'], factors_hospital_overall_rating =  pd.factorize(master_data_without_na['Hospital overall rating'])
+cleaned_master_data = master_data_without_na
+cleaned_master_data
+print_ln()
+
+
 ```
 
 #################################### Perform EDA ###################################################################################
