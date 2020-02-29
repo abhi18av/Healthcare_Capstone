@@ -1481,6 +1481,14 @@ str(master_data_without_na)
 
 ```{python}
 
+columns_with_missing_data = round(100 * (master_data_without_na.isnull().sum() / len(master_data_without_na.index)), 2)
+
+output = columns_with_missing_data[columns_with_missing_data < 50]
+output = list(output.to_dict().keys())
+print_ln()
+
+master_data_without_na = master_data_without_na[output]
+master_data_without_na
 ```
 
 
