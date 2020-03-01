@@ -3,7 +3,6 @@ import os
 os.chdir(
     "/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/src/")
 
-print(os.listdir("./"))
 
 import numpy as np
 import pandas as pd

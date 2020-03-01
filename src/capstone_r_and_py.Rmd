@@ -2821,6 +2821,7 @@ from factor_analyzer import FactorAnalyzer
 
 ```{r}
 
+effe_master <- merge(effe_hosp, effectiveness, by = "Provider.ID")
 
 # As per the mentor suggestions we will first calculate the measures for effectiveness group and then create a function to perform the same for all the groups.
 # effectiveness scores
@@ -2838,11 +2839,12 @@ str(eff)
 
 ```{python}
 
-#effectiveness = pd.read_csv("cleaned_effectiveness_data_py.csv" )
+effe_master = pd.read_csv("effe_master_data_py.csv" )
 
-#effectiveness = effectiveness.drop(effectiveness.iloc[:, 1:8], axis=1)
-#effectiveness = effectiveness.reset_index()
-#effectiveness.index.names = ['']
+effectiveness = effe_master.drop(effe_master.iloc[:, 0:9], axis=1)
+effectiveness.columns
+print_ln()
+
 effectiveness
 
 #effectiveness = effectiveness.drop(effectiveness.iloc[:,0],  axis = 1)
@@ -2851,8 +2853,19 @@ effectiveness
 
 ```{r}
 #scale the data
+str(eff)
+print_ln()
+
 eff <- as.data.frame(scale(eff))
 str(eff)
+```
+
+```{python}
+eff <- as.data.frame(scale(eff))
+str(eff)
+```
+
+```{r}
 # Using psych package, apply factor analysis on eff
 # This command was provided by the mentor. We have to use the method=ML (maximum likelihood) and scores="tenBerge"
 Eff.fa <- fa(eff, method = "ml", scores = "tenBerge")
