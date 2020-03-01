@@ -83,7 +83,7 @@ print_ln()
 
 print_ln()
 
-fa.get_factor_variance()
+eff_factor_variance = fa.get_factor_variance()
 
 eff = eff.dropna(thresh=3)
 

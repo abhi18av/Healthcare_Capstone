@@ -2913,7 +2913,7 @@ fa = FactorAnalyzer(n_factors=10, rotation="varimax", method="ml")
 fa.fit(eff)
 print_ln()
 
-#fa.loadings_
+fa.loadings_
 
 print_ln()
 
@@ -2942,6 +2942,9 @@ print_ln()
 fa.get_factor_variance()
 
 ```
+
+
+
 
 
 ```{r}
@@ -3054,6 +3057,9 @@ eff
 eff_weights
 print_ln()
 
+str(eff)
+print_ln()
+
 # Multiply each attribute with corresponding weights obtained using Eff.fa$weights
 eff <- eff * eff_weights
 str(eff)
@@ -3064,10 +3070,13 @@ print_ln()
 str(eff)
 ```
 
-
 ```{python}
+eff
+print_ln()
 
-eff_weights
+eff_transformed =fa.transform(eff)
+eff_transformed.shape
+print(eff_transformed)
 
 ```
 
@@ -3168,42 +3177,42 @@ function_group_score <- function(data) {
 # readmission scores
 data <- read_master[, -c(2:8)]
 readmission_scores <- function_group_score(data)
-str(readmission_scores)
+#str(readmission_scores)
 names(readmission_scores)[2] <- "radm_score"
-head(readmission_scores)
+str(readmission_scores)
 
 # mortality scores
 data <- mort_master[, -c(2:8)]
 mortality_scores <- function_group_score(data)
-str(mortality_scores)
+#str(mortality_scores)
 names(mortality_scores)[2] <- "mort_score"
-head(mortality_scores)
+str(mortality_scores)
 
 # safety scores
 data <- safe_master[, -c(2:8)]
 safety_scores <- function_group_score(data)
-str(safety_scores)
+#str(safety_scores)
 names(safety_scores)[2] <- "safety_score"
 str(safety_scores)
 
 # experience scores
 data <- expe_master[, -c(2:8)]
 experience_scores <- function_group_score(data)
-str(experience_scores)
+#str(experience_scores)
 names(experience_scores)[2] <- "expe_score"
 str(experience_scores)
 
 # medical scores
 data <- medi_master[, -c(2:8)]
 medical_scores <- function_group_score(data)
-str(medical_scores)
+#str(medical_scores)
 names(medical_scores)[2] <- "medi_score"
 str(medical_scores)
 
 # timeliness scores
 data <- time_master[, -c(2:8)]
 timeliness_scores <- function_group_score(data)
-str(timeliness_scores)
+#str(timeliness_scores)
 names(timeliness_scores)[2] <- "time_score"
 str(timeliness_scores)
 
