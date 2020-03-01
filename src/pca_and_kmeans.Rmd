@@ -1,0 +1,250 @@
+---
+title: "pca_and_kmeans"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#setwd("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/")
+knitr::opts_knit$set(root.dir = normalizePath("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/src/"))  # should change the working directory to 'Users/Me/Docs/Proj'
+```
+
+
+```{python}
+import os
+os.chdir("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/src/")
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.neighbors import NearestNeighbors
+from random import sample
+from numpy.random import uniform
+from math import isnan
+
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn import metrics
+from sklearn.decomposition import PCA
+from sklearn.model_selection import train_test_split
+import sklearn
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+
+import warnings
+warnings.filterwarnings('ignore')
+sns.set_style('whitegrid')
+sns.set_context('paper')
+
+def print_ln():
+    print('-' * 80, '\n')
+
+
+```
+
+
+```{python}
+
+cleaned_master_data = pd.read_csv("cleaned_master_data_py.csv")
+cleaned_master_data
+```
+
+
+
+
+```{python}
+
+cleaned_master_data_numerical_values = cleaned_master_data.set_index('Provider ID')
+cleaned_master_data_numerical_values.head()
+print_ln()
+cleaned_master_data_numerical_values.columns
+
+```
+
+
+
+```{python}
+
+
+# Putting feature variable to X
+X = cleaned_master_data_numerical_values.drop(['Hospital overall rating'],axis=1)
+
+# Putting response variable to y
+y = cleaned_master_data_numerical_values['Hospital overall rating']
+
+
+## With Incremental PCA
+
+from sklearn.decomposition import IncrementalPCA
+X_pca = IncrementalPCA(n_components=4).fit_transform(X)
+X_pca
+print_ln()
+
+```
+
+
+```{python}
+
+X_train, X_test, y_train, y_test = train_test_split(X_pca ,y, \
+                                                    train_size=0.7, \
+                                                    test_size=0.3, \
+                                                    random_state=100)
+
+X_train
+
+```
+
+
+
+
+## K-means
+
+## K = 5
+
+
+```{python}
+kmeans_model = KMeans(n_clusters = 5, max_iter=100,random_state = 50)
+kmeans_model.fit(X_train, y_train)
+print_ln()
+kmeans_model.labels_
+  
+```
+
+
+```{python}
+#Train the model using the training sets y_pred=clf.predict(X_test)
+#kmeans_model.fit(kmean_df)
+
+#kmeans_model.fit(X_train, y_train)
+
+#kmeans_model.fit(X_train)
+
+y_pred= kmeans_model.predict(X_test)
+
+
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+#print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
+#print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
+#print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+print_ln()
+
+print("=== Confusion Matrix ===")
+print(confusion_matrix(y_test, y_pred))
+print_ln()
+
+print("=== Classification Report ===")
+print(classification_report(y_test, y_pred))
+print_ln()
+
+kmeans_model_score = cross_val_score(kmeans_model, X, y, cv=10)
+
+
+print("=== All AUC Scores ===")
+print(kmeans_model_score)
+print_ln()
+
+print("=== Mean AUC Score ===")
+print("Mean AUC Score - K-means: ", kmeans_model_score.mean())
+print_ln()
+
+
+```
+
+    
+```{python}
+
+kmean_df= df_kmean
+kmean_df.index = pd.RangeIndex(len(kmean_df.index))
+kmean_df = pd.concat([kmean_df, pd.Series(kmeans_model.labels_)], axis=1)
+kmean_df.columns = ['PC1', 'PC2','ClusterID']
+kmean_df
+
+```
+
+
+
+```{python}
+kmean_df['ClusterID'].value_counts()
+
+#kmean_df['Hospital overall rating'].value_counts()
+ 
+```
+
+
+```{python}
+plt.figure(figsize=(15,15))
+sns.scatterplot(x='PC1',y='PC2',hue='ClusterID',legend='full',data=kmean_df, palette='Set1')
+```
+
+
+
+
+
+
+```{python}
+y_pred
+
+print_ln()
+
+y_test
+
+```
+
+
+
+
+```{python}
+
+def kmeans(k=4):
+    kmeans_model = KMeans(n_clusters = k, max_iter=100,random_state = 50)
+    kmeans_model.fit(df_kmean)
+
+    kmeans_df=df_kmean
+    kmeans_df.index = pd.RangeIndex(len(kmeans_df.index))
+    
+    kmeans_df2 = pd.concat([kmeans_df, pd.Series(kmeans_model.labels_)], axis=1)
+    kmeans_df2.columns = ['PC1', 'PC2','ClusterID']
+    kmeans_df2.head()
+
+    kmeans_df2['ClusterID'].value_counts()
+
+    #Train the model using the training sets y_pred=clf.predict(X_test)
+    kmeans_model.fit(X_train, y_train)
+
+    y_pred= kmeans_model.predict(X_test)
+
+
+    #print(kmean_model.predict(X_test))
+
+
+    print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+    print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
+    print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
+    print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+
+
+    print("=== Confusion Matrix ===")
+    print(confusion_matrix(y_test, y_pred))
+    print_ln()
+
+    print("=== Classification Report ===")
+    print(classification_report(y_test, y_pred))
+    print_ln()
+
+    kmeans_model_score = cross_val_score(kmeans_model, X, y, cv=10)
+
+
+    print("=== All AUC Scores ===")
+    print(kmeans_model_score)
+    print_ln()
+
+    print("=== Mean AUC Score ===")
+    print("Mean AUC Score - K-means: ", kmeans_model_score.mean())
+    print_ln()
+
+
+```
+
