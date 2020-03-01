@@ -336,7 +336,7 @@ read_meas_score <- func_rename(read_meas_score)
 str(read_meas_score)
 ```
 ```{python}
-read_meas_score =  rename_columns(read_meas_score)
+read_meas_score =  func_rename(read_meas_score)
 read_meas_score
 print_ln()
 
@@ -1337,7 +1337,7 @@ master_data_x = master_data_x.drop_duplicates(keep='first')
 master_data_x
 print_ln()
 
-master_data_x.isnull().sum() 
+master_data_x.isnull().sum()
 
 columns_with_missing_data = round(100 * (master_data_x.isnull().sum() / len(master_data_x.index)), 2)
 columns_with_missing_data[columns_with_missing_data > 30].plot(kind='bar')
@@ -1554,7 +1554,7 @@ write.csv(cleaned_master_data, "cleaned_master_data.csv")
 ```
 
 ```{python}
-master_data_without_na = master_data_without_na.drop(master_data_without_na.iloc[:, 1:8],  axis = 1) 
+master_data_without_na = master_data_without_na.drop(master_data_without_na.iloc[:, 1:8],  axis = 1)
 master_data_without_na['Hospital overall rating'], factors_hospital_overall_rating =  pd.factorize(master_data_without_na['Hospital overall rating'])
 cleaned_master_data = master_data_without_na
 cleaned_master_data
@@ -2142,7 +2142,7 @@ write.csv(correlation_readmission, "correlation_readmission.csv")
 ```{python}
 # correlation of readmission
 readmission = read_master
-readmission = readmission.drop(readmission.iloc[:, 0:8],  axis = 1) 
+readmission = readmission.drop(readmission.iloc[:, 0:8],  axis = 1)
 readmission
 
 corr_matrix = readmission.corr().abs()
@@ -2451,7 +2451,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                     stratify=y,
                                                     train_size=0.7,
                                                     test_size=0.3, random_state=100)
-                                                    
+
 X_train
 print_ln()
 
@@ -2463,7 +2463,7 @@ print_ln()
 
 y_test
 print_ln()
-                                                    
+
 ```
 
 
@@ -2565,7 +2565,7 @@ print("Mean AUC Score - Random Forest: ", model_rf1_score.mean())
 print_ln()
 
 
-# TODO 
+# TODO
 # https://towardsdatascience.com/an-implementation-and-explanation-of-the-random-forest-in-python-77bf308a9b76
 ```
 
@@ -2811,61 +2811,228 @@ print_ln()
 ```{r}
 # install.packages("psych")
 # install.packages("Information")
-
-
+library(psych)
 ```
 
+```{python}
+# https://www.datacamp.com/community/tutorials/introduction-factor-analysis
+from factor_analyzer import FactorAnalyzer
+```
 
 ```{r}
 
-library(psych)
+effe_master <- merge(effe_hosp, effectiveness, by = "Provider.ID")
 
 # As per the mentor suggestions we will first calculate the measures for effectiveness group and then create a function to perform the same for all the groups.
 # effectiveness scores
 effectiveness <- effe_master[, -c(2:8)]
 str(effectiveness)
+
+print_ln()
+
 # remove the Provider.ID column
 eff <- effectiveness[, -1]
 str(eff)
 
+```
+
+
+```{python}
+
+effe_master = pd.read_csv("effe_master_data_py.csv" )
+
+eff = effe_master.drop(effe_master.iloc[:, 0:9], axis=1)
+eff.columns
+print_ln()
+
+eff
+
+#effectiveness = effectiveness.drop(effectiveness.iloc[:,0],  axis = 1)
+```
+
+
+```{r}
 #scale the data
+str(eff)
+print_ln()
+
 eff <- as.data.frame(scale(eff))
 str(eff)
+```
+
+```{python}
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+eff[eff.columns] = scaler.fit_transform(eff[eff.columns])
+eff
+
+```
+
+```{r}
 # Using psych package, apply factor analysis on eff
 # This command was provided by the mentor. We have to use the method=ML (maximum likelihood) and scores="tenBerge"
 Eff.fa <- fa(eff, method = "ml", scores = "tenBerge")
+str(Eff.fa)
+print_ln()
 
 # finding the weights
 eff_weights <- Eff.fa$weights
 eff_weights
+print_ln()
+
 sum(eff_weights)
+print_ln()
 # [1] 1.353024
 # The sum value is supposed to be 1
 eff_weights <- eff_weights / sum(eff_weights)
 sum(eff_weights)
+
+```
+
+```{python}
+
+eff.corr()
+#sns.heatmap(eff.corr())
+#plt.show()
+print_ln()
+
+
+eff.info()
+print_ln()
+
+#from factor_analyzer.factor_analyzer import calculate_bartlett_sphericity
+#chi_square_value,p_value=calculate_bartlett_sphericity(eff)
+#chi_square_value, p_value
+
+#from factor_analyzer.factor_analyzer import calculate_kmo
+#kmo_all,kmo_model=calculate_kmo(eff)
+#kmo_model
+
+# at n=20, variance drops to 19
+# at n=15, variance is 35
+# at n=10, variance is 39 - highest
+fa = FactorAnalyzer(n_factors=10, rotation="varimax", method="ml")
+
+fa.fit(eff)
+print_ln()
+
+fa.loadings_
+
+print_ln()
+
+ev, v = fa.get_eigenvalues()
+
+# We can see only for 6-factors eigenvalues are greater than one. It means we need to choose only 6 factors (or unobserved variables)
+ev
+
+#plt.scatter(range(1,eff.shape[1]+1),ev)
+#plt.plot(range(1,eff.shape[1]+1),ev)
+#plt.title('Scree Plot')
+#plt.xlabel('Factors')
+#plt.ylabel('Eigenvalue')
+#plt.grid()
+#plt.show()
+
+print_ln()
+
+fa.get_factor_variance()
+print_ln()
+
+eff_weights =  fa.get_factor_variance()[1]
+np.sum(eff_weights)
+
+```
+
+
+```{r}
 # CMS says a hospital needs to have at least 3 measures per group
 # Rows with attribute values having more than 3 NA's are removed(Removing all such hospitals)
 
+## NOTE @abhi18av  possible correction
+# Rows with attribute values having less than 3 non-NA's are removed(Removing all such hospitals)
+
 eff$remove <- 0
+str(eff)
+print_ln()
 
 for (x in 1:nrow(eff)) {
   if (sum(!is.na(eff[x,])) <= 3) { eff[x, c("remove")] = 1 }
   else { eff[x, c("remove")] = 0 }
 }
 
+write.csv(eff, "eff_data.csv")
+
+sum(eff$remove)
+print_ln()
+
 round(sum(eff$remove) / nrow(eff) * 100, 2)
 # [1] 22.31
 # Thus, about 22% hospitals are not valid as per CMS restrictions.
 
-row_num <- which(!eff$remove)
+print_ln()
 
+row_num <- which(!eff$remove)
+str(row_num)
+print_ln()
 
 eff <- eff[which(!eff$remove),]
+str(eff)
+print_ln()
+
 sum(eff$remove)
 # [1] 0
 eff <- eff[, -ncol(eff)]
 str(eff)
 
+```
+
+
+```{python}
+
+#row_nan_counts = eff.isnull().sum(axis=1).to_list()
+
+#row_nan_counts_boolean = []
+
+#for a_count in row_nan_counts:
+#    if a_count <= 3:
+#        row_nan_counts_boolean.append(1)
+#    else:
+#        row_nan_counts_boolean.append(0)
+      
+#row_nan_counts_boolean
+
+#eff['remove'] =  row_nan_counts_boolean
+#eff
+#eff.to_csv("eff_data_py.csv")
+#print_ln()
+
+#eff['remove'].sum() / eff['remove'].count()
+#print_ln()
+
+#eff.isnull().sum(axis=1)
+#eff.isnull().sum(axis=1).to_list()
+#eff.shape[1] - eff.count(axis=1)
+#print_ln()
+
+#eff.dropna(thresh= 15)
+
+## NOTE @abhi18av  possible correction
+# Rows with attribute values having less than 3 non-NA's are removed(Removing all such hospitals)
+
+eff = eff.dropna(thresh= 3)
+
+eff
+
+eff.to_csv("eff_data_py.csv")
+
+```
+
+
+
+
+```{r}
 # We will replace the NA's with the median values.
 median_na <- function(x) {
   x[which(is.na(x))] <- median(x, na.rm = T)
@@ -2873,7 +3040,18 @@ median_na <- function(x) {
 }
 
 eff <- data.frame(sapply(eff, median_na))
+str(eff)
+```
 
+
+```{python}
+eff = eff.apply(lambda x: x.fillna(x.median()), axis=0)
+eff
+
+```
+
+
+```{r}
 # calculating group scores
 head(eff_weights)
 
