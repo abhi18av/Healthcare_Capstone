@@ -3518,11 +3518,13 @@ master_data_y$Hospital.overall.rating <- factor(master_data_y$Hospital.overall.r
 final_score_df <- merge(final_score_df, master_data_y, by = "Provider.ID")
 str(final_score_df)
 summary(final_score_df$newcluster_id)
+print_ln()
 
 # Accuracy is determined by comparing the overall ratings of CMS(general.csv) by creating the confusion matrix.
 final = table(final_score_df$newcluster_id, final_score_df$Hospital.overall.rating)
 final
 
+print_ln()
 conf_matrix4 <- confusionMatrix(final)
 conf_matrix4
 
