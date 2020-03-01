@@ -336,7 +336,7 @@ read_meas_score <- func_rename(read_meas_score)
 str(read_meas_score)
 ```
 ```{python}
-read_meas_score =  rename_columns(read_meas_score)
+read_meas_score =  func_rename(read_meas_score)
 read_meas_score
 print_ln()
 
@@ -1337,7 +1337,7 @@ master_data_x = master_data_x.drop_duplicates(keep='first')
 master_data_x
 print_ln()
 
-master_data_x.isnull().sum() 
+master_data_x.isnull().sum()
 
 columns_with_missing_data = round(100 * (master_data_x.isnull().sum() / len(master_data_x.index)), 2)
 columns_with_missing_data[columns_with_missing_data > 30].plot(kind='bar')
@@ -1554,7 +1554,7 @@ write.csv(cleaned_master_data, "cleaned_master_data.csv")
 ```
 
 ```{python}
-master_data_without_na = master_data_without_na.drop(master_data_without_na.iloc[:, 1:8],  axis = 1) 
+master_data_without_na = master_data_without_na.drop(master_data_without_na.iloc[:, 1:8],  axis = 1)
 master_data_without_na['Hospital overall rating'], factors_hospital_overall_rating =  pd.factorize(master_data_without_na['Hospital overall rating'])
 cleaned_master_data = master_data_without_na
 cleaned_master_data
@@ -2142,7 +2142,7 @@ write.csv(correlation_readmission, "correlation_readmission.csv")
 ```{python}
 # correlation of readmission
 readmission = read_master
-readmission = readmission.drop(readmission.iloc[:, 0:8],  axis = 1) 
+readmission = readmission.drop(readmission.iloc[:, 0:8],  axis = 1)
 readmission
 
 corr_matrix = readmission.corr().abs()
@@ -2451,7 +2451,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                     stratify=y,
                                                     train_size=0.7,
                                                     test_size=0.3, random_state=100)
-                                                    
+
 X_train
 print_ln()
 
@@ -2463,7 +2463,7 @@ print_ln()
 
 y_test
 print_ln()
-                                                    
+
 ```
 
 
@@ -2565,7 +2565,7 @@ print("Mean AUC Score - Random Forest: ", model_rf1_score.mean())
 print_ln()
 
 
-# TODO 
+# TODO
 # https://towardsdatascience.com/an-implementation-and-explanation-of-the-random-forest-in-python-77bf308a9b76
 ```
 
@@ -2811,23 +2811,45 @@ print_ln()
 ```{r}
 # install.packages("psych")
 # install.packages("Information")
-
-
+library(psych)
 ```
 
+```{python}
+# https://www.datacamp.com/community/tutorials/introduction-factor-analysis
+from factor_analyzer import FactorAnalyzer
+```
 
 ```{r}
 
-library(psych)
 
 # As per the mentor suggestions we will first calculate the measures for effectiveness group and then create a function to perform the same for all the groups.
 # effectiveness scores
 effectiveness <- effe_master[, -c(2:8)]
 str(effectiveness)
+
+print_ln()
+
 # remove the Provider.ID column
 eff <- effectiveness[, -1]
 str(eff)
 
+```
+
+
+```{python}
+
+#effectiveness = pd.read_csv("cleaned_effectiveness_data_py.csv" )
+
+#effectiveness = effectiveness.drop(effectiveness.iloc[:, 1:8], axis=1)
+#effectiveness = effectiveness.reset_index()
+#effectiveness.index.names = ['']
+effectiveness
+
+#effectiveness = effectiveness.drop(effectiveness.iloc[:,0],  axis = 1)
+```
+
+
+```{r}
 #scale the data
 eff <- as.data.frame(scale(eff))
 str(eff)
