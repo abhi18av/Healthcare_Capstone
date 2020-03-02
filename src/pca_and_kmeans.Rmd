@@ -248,7 +248,8 @@ group_scores
 ```{python}
 
 group_scores['final_score'] = group_scores.mean(axis=1)
-group_scores
+final_score = group_scores
+final_score
 ```
 
 ```{python}
@@ -283,24 +284,33 @@ group_scores
 
 
 
-## PCA On all measures
-
-```{python}
-
-cleaned_master_data = pd.read_csv("cleaned_master_data_py.csv")
-cleaned_master_data
-```
-
-
+## PCA On all group_scores
 
 
 ```{python}
 
-cleaned_master_data_numerical_values = cleaned_master_data.set_index('Provider ID')
+cleaned_master_data_numerical_values = group_scores
 cleaned_master_data_numerical_values
 
 ```
 
+
+```{python}
+
+kmeans_model = KMeans(n_clusters = 5, max_iter=100,random_state = 100)
+kmeans_model.fit(cleaned_master_data_numerical_values)
+
+kmeans_model.labels_
+
+
+#Train the model using the training sets y_pred=clf.predict(X_test)
+
+#y_pred= kmeans_model.predict(X_test)
+
+#print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+
+
+```
 
 
 ```{python}
@@ -364,7 +374,7 @@ print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
 ```{python}
 import itertools
 model_possibilities = []
-for a_pair in itertools.product([1,2,3, 4, 5],[1, 2, 3, 4,5]):
+for a_pair in itertools.product([1,2,3, 4, 5, 6, 7],[1, 2, 3, 4, 5, 7]):
     model_possibilities.append(a_pair)
 
 model_possibilities   
