@@ -46,6 +46,106 @@ def print_ln():
 ```
 
 
+# PCA on a group of measures
+
+```{python}
+effe_master = pd.read_csv("effe_master_data_py.csv").drop(['Unnamed: 0'], axis= 1).set_index('Provider ID')
+effe_master.info()
+
+print_ln()
+
+eff = effe_master.drop(effe_master.iloc[:, 0:7], axis=1)
+eff.columns
+
+```
+
+
+```{python}
+eff = eff.dropna(thresh= 3)
+
+eff.to_csv("eff_data_py.csv")
+
+eff.info()
+```
+
+
+```{python}
+eff = eff.apply(lambda x: x.fillna(x.median()), axis=0)
+eff
+
+```
+
+
+```{python}
+
+## With Incremental PCA
+
+from sklearn.decomposition import IncrementalPCA, PCA
+pca = IncrementalPCA()
+eff_pca = pca.fit_transform(eff)
+eff_pca = pd.DataFrame(eff_pca, columns=eff.columns)
+eff_pca.index = eff.index
+eff_pca
+
+
+```
+
+```{python}
+pca.explained_variance_ratio_
+```
+
+
+```{python}
+eff_pca_weights = pd.DataFrame(pca.components_, columns=eff.columns)
+eff_pca_weights
+
+```
+
+
+
+```{python}
+
+eff_measure_weight = eff_pca.mean(axis=1)
+eff_measure_weight
+
+
+```
+
+```{python}
+
+eff_scores = pd.DataFrame({'effe' : eff_measure_weight})
+eff_scores
+```
+
+
+```{python}
+
+effe_master = pd.read_csv("effe_master_data_py.csv").drop(['Unnamed: 0'], axis= 1).set_index('Provider ID')
+eff = effe_master.drop(effe_master.iloc[:, 0:7], axis=1)
+
+
+def function_group_score(numeric_df):
+
+
+```
+
+
+
+```{python}
+
+variance_exp_cumsum = pca.explained_variance_ratio_.cumsum().round(2)
+fig, axes = plt.subplots(1,1,figsize=(16,7), dpi=100)
+plt.plot(variance_exp_cumsum, color='firebrick')
+plt.title('Screeplot of Variance Explained %', fontsize=22)
+plt.xlabel('# of PCs', fontsize=16)
+plt.show()
+```
+
+
+
+##########################
+## On all measures
+
 ```{python}
 
 cleaned_master_data = pd.read_csv("cleaned_master_data_py.csv")
