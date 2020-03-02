@@ -294,16 +294,63 @@ cleaned_master_data_numerical_values
 
 ```
 
+```{python}
+
+cleaned_master_data= pd.read_csv("cleaned_master_data_py.csv")
+temp_df = cleaned_master_data.set_index('Provider ID')
+```
 
 ```{python}
 
-kmeans_model = KMeans(n_clusters = 5, max_iter=100,random_state = 100)
-kmeans_model.fit(cleaned_master_data_numerical_values)
-
-kmeans_model.labels_
+temp_df[['Hospital overall rating']]
 
 
-#Train the model using the training sets y_pred=clf.predict(X_test)
+
+```
+
+```{python}
+
+temp_df = temp_df[['Hospital overall rating']]
+
+final_df = pd.merge(cleaned_master_data_numerical_values, temp_df, on= 'Provider ID')
+final_df
+
+
+```
+```{python}
+final_df.dtypes
+```
+
+```{python}
+
+
+#kmeans_model = KMeans(n_clusters = 5, max_iter=100,random_state = 100)
+#kmeans_model.fit(cleaned_master_data_numerical_values)
+#cleaned_master_data_numerical_values['Cluster ID'] =  kmeans_model.labels_
+#cleaned_master_data_numerical_values
+#print_ln()
+
+X = final_df.drop(['Hospital overall rating'], axis=1)
+y = final_df[['Hospital overall rating']]
+
+X_train, X_test, y_train, y_test = train_test_split(X ,y, \
+                                                    train_size=0.7, \
+                                                    test_size=0.3, \
+                                                    random_state=100)
+X_train
+
+print_ln()
+
+y_train
+
+kmeans_model = KMeans(n_clusters = 4, max_iter=100,random_state = 100)
+kmeans_model.fit(X)
+
+labelled_df = X.copy()
+
+labelled_df['Cluster ID'] =  kmeans_model.labels_
+
+labelled_df
 
 #y_pred= kmeans_model.predict(X_test)
 
@@ -311,6 +358,17 @@ kmeans_model.labels_
 
 
 ```
+```{python}
+ax = sns.boxplot(x="radm_score", y="Cluster ID", data=labelled_df)
+plt.plot()
+```
+
+```{python}
+cleaned_master_data_numerical_values['Cluster ID'].value_counts()
+
+```
+
+
 
 
 ```{python}
