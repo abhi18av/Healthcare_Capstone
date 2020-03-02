@@ -318,6 +318,12 @@ final_df
 
 ```
 ```{python}
+
+final_df['Hospital overall rating'].value_counts()
+
+```
+
+```{python}
 final_df.dtypes
 ```
 
@@ -330,45 +336,27 @@ final_df.dtypes
 #cleaned_master_data_numerical_values
 #print_ln()
 
-X = final_df.drop(['Hospital overall rating'], axis=1)
-y = final_df[['Hospital overall rating']]
+kmeans_model = KMeans(n_clusters = 5, max_iter=100,random_state = 100)
+kmeans_model.fit(cleaned_master_data_numerical_values)
 
-X_train, X_test, y_train, y_test = train_test_split(X ,y, \
-                                                    train_size=0.7, \
-                                                    test_size=0.3, \
-                                                    random_state=100)
-X_train
-
-print_ln()
-
-y_train
-
-kmeans_model = KMeans(n_clusters = 4, max_iter=100,random_state = 100)
-kmeans_model.fit(X)
-
-labelled_df = X.copy()
-
-labelled_df['Cluster ID'] =  kmeans_model.labels_
-
-labelled_df
-
-#y_pred= kmeans_model.predict(X_test)
-
-#print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+y_pred= kmeans_model.predict(X)
+y_pred
 
 
 ```
+
+
 ```{python}
-ax = sns.boxplot(x="radm_score", y="Cluster ID", data=labelled_df)
-plt.plot()
+pd.Series(y_pred).value_counts()
+
 ```
 
 ```{python}
-cleaned_master_data_numerical_values['Cluster ID'].value_counts()
+from sklearn.metrics import accuracy_score
+accuracy_score(final_df['Hospital overall rating'], y_pred)
+
 
 ```
-
-
 
 
 ```{python}
