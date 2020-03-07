@@ -5,7 +5,9 @@ data/
 /hospital_data/
 
 /src/*csv
+*.csv
 
 .RData
 .Rhistory
 /src/PCA.ipynb
+*.csv
