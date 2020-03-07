@@ -1,0 +1,91 @@
+---
+title: "05_Evanston_Hospital"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#setwd("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/")
+knitr::opts_knit$set(root.dir = normalizePath("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/submission/"))  # should change the working directory to 'Users/Me/Docs/Proj'
+```
+
+
+
+```{python}
+# Exploratory Data Analysis
+
+import os
+os.chdir("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/submission/")
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.neighbors import NearestNeighbors
+from random import sample
+from numpy.random import uniform
+from math import isnan
+
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn import metrics
+from sklearn.decomposition import PCA, IncrementalPCA
+from sklearn.model_selection import train_test_split
+import sklearn
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+
+import warnings
+warnings.filterwarnings('ignore')
+sns.set_style('whitegrid')
+sns.set_context('paper')
+
+
+def print_ln():
+    print('-' * 80, '\n')
+
+
+```
+
+
+```{python}
+
+
+# General Hospital Ratings
+cleaned_hospital_ratings = pd.read_csv("cleaned_hospital_ratings_data.csv", index_col='Provider ID')
+
+# Group-1 Readmission
+cleaned_readmission = pd.read_csv("cleaned_readmission_data.csv", index_col='Provider ID')
+read_master = pd.read_csv("read_master_data.csv", index_col='Provider ID')
+
+# Group-2 Mortality
+cleaned_mortality = pd.read_csv("cleaned_mortality_data.csv", index_col='Provider ID')
+mort_master = pd.read_csv("mort_master_data.csv", index_col='Provider ID')
+
+# Group-3 Safety
+cleaned_safety = pd.read_csv("cleaned_safety_data.csv", index_col='Provider ID')
+safe_master = pd.read_csv("safe_master_data.csv", index_col='Provider ID')
+
+# Group-4 Experience
+cleaned_experience = pd.read_csv("cleaned_experience_data.csv", index_col='Provider ID')
+expe_master = pd.read_csv("expe_master_data.csv", index_col='Provider ID')
+
+# Group-5 Medical
+cleaned_medical = pd.read_csv("cleaned_medical_data.csv", index_col='Provider ID')
+medi_master = pd.read_csv("medi_master_data.csv", index_col='Provider ID')
+
+# Group-6 Timeliness
+cleaned_timeliness = pd.read_csv("cleaned_timeliness_data.csv", index_col='Provider ID')
+time_master = pd.read_csv("time_master_data.csv", index_col='Provider ID')
+
+# Group-7 Effectiveness
+cleaned_effectiveness = pd.read_csv("cleaned_effectiveness_data.csv", index_col='Provider ID')
+effe_master = pd.read_csv("effe_master_data.csv", index_col='Provider ID')
+
+# Cleaned master dataset
+cleaned_master = pd.read_csv("cleaned_master_data.csv", index_col='Provider ID')
+
+```

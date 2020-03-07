@@ -34,7 +34,11 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, normalize
+from sklearn.cluster import AgglomerativeClustering
 
+from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import dendrogram
+from scipy.cluster.hierarchy import cut_tree
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -299,10 +303,14 @@ group_scores = merge6
 group_scores.columns
 print_ln()
 
+
+group_scores.to_csv("group_score_data.csv")
+
 group_scores
 
 
 ```
+
 
 ```{python}
 # readmission = 0.22, mortality = 0.22, safety = 0.22, experience = 0.22, medical = 0.04, timeliness = 0.04, effectiveness = 0.04
@@ -317,9 +325,9 @@ cms_weights
 # them to form final_score=sum(each_column * cms_weights)/7
 
 final_scores = pd.DataFrame(group_scores.multiply(cms_weights, axis=1).apply(np.sum, axis=1)/7, columns=['final_score'])
+final_scores.to_csv("final_scores_data.csv')
 final_scores.head(10)
 ```
-
 
 
 # Calculation of final scores is now complete
@@ -332,39 +340,37 @@ final_scores.head(10)
 # KMeans on final scores
 
 
+
+
 ```{python}
+final_scores_scaled = pd.DataFrame(StandardScaler().fit_transform(final_scores), index=final_scores.index, columns=['final_score'])
+final_scores_scaled
+
+
+kmeans_model = KMeans(n_clusters = 5, max_iter=100,random_state = 100)
+kmeans_model.fit(final_scores_scaled)
+
+# Adjust ClusterID to reflect the star rating system
+final_scores_scaled['ClusterID'] = kmeans_model.labels_ + 1
+
+final_scores_scaled.head(10)
+
+```
+
+
+```{python}
+
 # Merge the final_scores and ratings dataset
 
-final_scores_and_ratings= pd.merge(final_scores, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
-final_scores_and_ratings.head()
+final_scores_scaled_and_ratings= pd.merge(final_scores_scaled, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
+final_scores_scaled_and_ratings.head()
 
-
-```
-
-
-```{python}
-X = final_scores_and_ratings.loc[:, final_scores_and_ratings.columns != 'Hospital overall rating']
-X = StandardScaler().fit_transform(X)
-
-y = final_scores_and_ratings.loc[:, 'Hospital overall rating']
-
-
-X_train, X_test, y_train, y_test = train_test_split(X, y,
-                                                    stratify=y,
-                                                    train_size=0.7,
-                                                    test_size=0.3, random_state=100)
-
-```
-
-
-```{python}
-kmeans_model = KMeans(n_clusters = 5, max_iter=100,random_state = 100)
-kmeans_model.fit(X_train)
-
-y_pred= kmeans_model.predict(X_test)
 print_ln()
 
-print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+real_ratings =  final_scores_scaled_and_ratings['Hospital overall rating']
+pred_ratings =  final_scores_scaled_and_ratings['ClusterID']
+
+print("Accuracy:", metrics.accuracy_score(real_ratings, pred_ratings))
 
 ```
 
@@ -375,51 +381,34 @@ print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
 ```{python}
 # Merge the group_scores and ratings dataset
 
-groups_and_ratings= pd.merge(group_scores, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
-groups_and_ratings.head()
-
-```
+#groups_and_ratings= pd.merge(group_scores, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
+#groups_and_ratings.head()
 
 
-```{python}
 
-X = groups_and_ratings.loc[:, groups_and_ratings.columns != 'Hospital overall rating']
-#X = StandardScaler().fit_transform(X)
-X = normalize(X)
-
-y = groups_and_ratings.loc[:, 'Hospital overall rating']
+group_scores_scaled = pd.DataFrame(StandardScaler().fit_transform(group_scores), index=group_scores.index, columns=group_scores.columns)
+group_scores_scaled
 
 
-X_train, X_test, y_train, y_test = train_test_split(X, y,
-                                                    stratify=y,
-                                                    train_size=0.7,
-                                                    test_size=0.3, random_state=100)
-
-```
-
-
-```{python}
 kmeans_model = KMeans(n_clusters = 5, max_iter=100,random_state = 100)
-kmeans_model.fit(X_train)
+kmeans_model.fit(group_scores_scaled)
 
-y_pred= kmeans_model.predict(X_test)
+# Adjust ClusterID to reflect the star rating system
+group_scores_scaled['ClusterID'] = kmeans_model.labels_ + 1
+
+group_scores_scaled.head(10)
+
+# Merge the group_scores and ratings dataset
+
+group_scores_scaled_and_ratings= pd.merge(group_scores_scaled, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
+group_scores_scaled_and_ratings.head()
+
 print_ln()
 
-print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+real_ratings =  group_scores_scaled_and_ratings['Hospital overall rating']
+pred_ratings =  group_scores_scaled_and_ratings['ClusterID']
 
-```
-
-
-
-```{python}
-kmeans_model = KMeans(algorithm='elkan',  n_clusters = 5, max_iter=1000,random_state = 100)
-kmeans_model.fit(X_train)
-
-y_pred= kmeans_model.predict(X_test)
-print_ln()
-
-print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
-
+print("Accuracy:", metrics.accuracy_score(real_ratings, pred_ratings))
 
 
 ```
@@ -429,3 +418,112 @@ print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
 # Hierarchal Clustering
 ##########################
 
+```{python}
+
+final_scores_scaled = pd.DataFrame(StandardScaler().fit_transform(final_scores), index=final_scores.index, columns=['final_score'])
+
+cluster_model = AgglomerativeClustering(n_clusters=4, affinity='euclidean', linkage='ward')
+
+cluster_model.fit(final_scores_scaled)
+
+# Adjust ClusterID to reflect the star rating system
+final_scores_scaled['ClusterID'] = cluster_model.labels_ + 1
+
+final_scores_scaled.head(10)
+
+# Merge the final_scores and ratings dataset
+
+final_scores_scaled_and_ratings= pd.merge(final_scores_scaled, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
+final_scores_scaled_and_ratings.head()
+
+print_ln()
+
+real_ratings =  final_scores_scaled_and_ratings['Hospital overall rating']
+pred_ratings =  final_scores_scaled_and_ratings['ClusterID']
+
+print("Accuracy:", metrics.accuracy_score(real_ratings, pred_ratings))
+
+```
+
+
+
+##########################
+# Final Scores
+
+```{python}
+
+final_scores_scaled = pd.DataFrame(StandardScaler().fit_transform(final_scores), index=final_scores.index, columns=['final_score'])
+
+
+# single linkage
+mergings = linkage(final_scores_scaled, method="single", metric='euclidean')
+dendrogram(mergings)
+plt.show()
+
+
+
+```
+
+
+```{python}
+
+
+cluster_labels = cut_tree(mergings, n_clusters=5).reshape(-1, )
+
+# Adjust ClusterID to reflect the star rating system
+final_scores_scaled['ClusterID'] = cluster_labels + 1
+
+final_scores_scaled.head(10)
+
+# Merge the group_scores and ratings dataset
+
+final_scores_scaled_and_ratings= pd.merge(group_scores_scaled, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
+final_scores_scaled_and_ratings.head()
+
+print_ln()
+
+real_ratings =  final_scores_scaled_and_ratings['Hospital overall rating']
+pred_ratings =  final_scores_scaled_and_ratings['ClusterID']
+
+print("Accuracy:", metrics.accuracy_score(real_ratings, pred_ratings))
+
+
+```
+
+
+```{python}
+
+group_scores_scaled = pd.DataFrame(StandardScaler().fit_transform(group_scores), index=group_scores.index, columns=group_scores.columns)
+
+# complete linkage
+mergings = linkage(group_scores_scaled, method="complete", metric='euclidean')
+dendrogram(mergings)
+plt.show()
+
+```
+
+
+```{python}
+
+cluster_labels = cut_tree(mergings, n_clusters=5).reshape(-1, )
+
+# Adjust ClusterID to reflect the star rating system
+group_scores_scaled['ClusterID'] = cluster_labels + 1
+
+group_scores_scaled.head(10)
+
+# Merge the group_scores and ratings dataset
+
+group_scores_scaled_and_ratings= pd.merge(group_scores_scaled, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
+group_scores_scaled_and_ratings.head()
+
+print_ln()
+
+real_ratings =  group_scores_scaled_and_ratings['Hospital overall rating']
+pred_ratings =  group_scores_scaled_and_ratings['ClusterID']
+
+print("Accuracy:", metrics.accuracy_score(real_ratings, pred_ratings))
+
+
+
+```
