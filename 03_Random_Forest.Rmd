@@ -1,0 +1,133 @@
+---
+title: "03_Random_Forest"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#setwd("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/")
+knitr::opts_knit$set(root.dir = normalizePath("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/submission/"))  # should change the working directory to 'Users/Me/Docs/Proj'
+```
+
+```{python}
+# Exploratory Data Analysis
+
+import os
+os.chdir("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/submission/")
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.neighbors import NearestNeighbors
+from random import sample
+from numpy.random import uniform
+from math import isnan
+
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn import metrics
+from sklearn.decomposition import PCA, IncrementalPCA
+from sklearn.model_selection import train_test_split
+import sklearn
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+
+import warnings
+warnings.filterwarnings('ignore')
+sns.set_style('whitegrid')
+sns.set_context('paper')
+
+
+def print_ln():
+    print('-' * 80, '\n')
+
+
+def plot_avg_comparison(col_name):
+    print(hospital_ratings.groupby([col_name]).size().sort_values(ascending=False).head())
+    avg_by_col_name = hospital_ratings.groupby([col_name])["Hospital overall rating"].agg({"Hospital overall rating": np.mean })
+    avg_by_col_name = avg_by_col_name.sort_values(by=["Hospital overall rating"], ascending= False).reset_index()
+    plot = sns.barplot(x = col_name, y= "Hospital overall rating", data = avg_by_col_name.head(10), palette = 'hls')
+    plot.set_xticklabels(plot.get_xticklabels(), rotation=45)
+    plt.title("Average " +  col_name)
+    plt.show()
+ 
+
+```
+
+```{python}
+
+
+# Cleaned master dataset
+cleaned_master = pd.read_csv("cleaned_master_data.csv", index_col='Provider ID')
+
+
+```
+
+```{python}
+# split into train and test
+from sklearn.model_selection import train_test_split
+
+#cleaned_master_data['Hospital overall rating'], factors_hospital_overall_rating =  pd.factorize(cleaned_master_data['Hospital overall rating'])
+
+#cleaned_master_data = pd.get_dummies(cleaned_master_data['Hospital overall rating'], prefix='Hospital overall rating', drop_first=True)
+print(cleaned_master)
+
+print_ln()
+
+X = cleaned_master.loc[:, cleaned_master.columns != 'Hospital overall rating']
+y = cleaned_master.loc[:, 'Hospital overall rating']
+
+#from sklearn import preprocessing
+#y = preprocessing.label_binarize(y, classes=[ 1, 2, 3, 4, 5])
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                    stratify=y,
+                                                    train_size=0.7,
+                                                    test_size=0.3, random_state=100)
+
+X_train
+print_ln()
+
+X_test
+print_ln()
+
+y_train
+print_ln()
+
+y_test
+print_ln()
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
