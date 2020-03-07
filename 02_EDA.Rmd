@@ -1,0 +1,478 @@
+---
+title: "02_EDA"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#setwd("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/")
+knitr::opts_knit$set(root.dir = normalizePath("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/submission/"))  # should change the working directory to 'Users/Me/Docs/Proj'
+```
+
+```{python}
+# Exploratory Data Analysis
+
+import os
+os.chdir("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/submission/")
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.neighbors import NearestNeighbors
+from random import sample
+from numpy.random import uniform
+from math import isnan
+
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn import metrics
+from sklearn.decomposition import PCA, IncrementalPCA
+from sklearn.model_selection import train_test_split
+import sklearn
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+
+import warnings
+warnings.filterwarnings('ignore')
+sns.set_style('whitegrid')
+sns.set_context('paper')
+
+
+def plot_avg_comparison(col_name):
+    print(hospital_ratings.groupby([col_name]).size().sort_values(ascending=False).head())
+    avg_by_col_name = hospital_ratings.groupby([col_name])["Hospital overall rating"].agg({"Hospital overall rating": np.mean })
+    avg_by_col_name = avg_by_col_name.sort_values(by=["Hospital overall rating"], ascending= False).reset_index()
+    plot = sns.barplot(x = col_name, y= "Hospital overall rating", data = avg_by_col_name.head(10), palette = 'hls')
+    plot.set_xticklabels(plot.get_xticklabels(), rotation=45)
+    plt.title("Average " +  col_name)
+    plt.show()
+ 
+
+
+def plot_corr_map(df):
+    plt.figure(figsize = (20,10))
+    df_corr = df.corr()
+    sns.heatmap(df_corr, cmap='coolwarm' )
+    plt.show()
+
+```
+
+
+```{python}
+
+# In[105]:
+
+
+# Converts the datatype of a specific column and returns the new dataframe
+def func_numeric(df, col_name):
+    df[col_name] = df[col_name].astype(float)
+    return df
+
+
+# In[106]:
+```
+
+
+
+```{python}
+
+
+
+# General Hospital Ratings
+cleaned_hospital_ratings = pd.read_csv("cleaned_hospital_ratings_data.csv", index_col='Provider ID')
+
+# Group-1 Readmission
+cleaned_readmission = pd.read_csv("cleaned_readmission_data.csv", index_col='Provider ID')
+read_master = pd.read_csv("read_master_data.csv", index_col='Provider ID')
+
+# Group-2 Mortality
+cleaned_mortality = pd.read_csv("cleaned_mortality_data.csv", index_col='Provider ID')
+mort_master = pd.read_csv("mort_master_data.csv", index_col='Provider ID')
+
+# Group-3 Safety
+cleaned_safety = pd.read_csv("cleaned_safety_data.csv", index_col='Provider ID')
+safe_master = pd.read_csv("safe_master_data.csv", index_col='Provider ID')
+
+# Group-4 Experience
+cleaned_experience = pd.read_csv("cleaned_experience_data.csv", index_col='Provider ID')
+expe_master = pd.read_csv("expe_master_data.csv", index_col='Provider ID')
+
+# Group-5 Medical
+cleaned_medical = pd.read_csv("cleaned_medical_data.csv", index_col='Provider ID')
+medi_master = pd.read_csv("medi_master_data.csv", index_col='Provider ID')
+
+# Group-6 Timeliness
+cleaned_timeliness = pd.read_csv("cleaned_timeliness_data.csv", index_col='Provider ID')
+time_master = pd.read_csv("time_master_data.csv", index_col='Provider ID')
+
+# Group-7 Effectiveness
+cleaned_effectiveness = pd.read_csv("cleaned_effectiveness_data.csv", index_col='Provider ID')
+effe_master = pd.read_csv("effe_master_data.csv", index_col='Provider ID')
+
+# Cleaned master dataset
+cleaned_master = pd.read_csv("cleaned_master_data.csv", index_col='Provider ID')
+
+
+
+```
+
+```{python}
+# In[107]:
+
+
+cleaned_hospital_ratings['Hospital Type'].value_counts()
+```
+
+```{python}
+
+# In[108]:
+
+```
+
+```{python}
+hospital_ratings =  cleaned_hospital_ratings[cleaned_hospital_ratings['Hospital Type'] == 'Acute Care Hospitals']
+
+hospital_ratings['Hospital Type'], factors_hospital_type =  pd.factorize(hospital_ratings['Hospital Type'])
+
+hospital_ratings.head()
+
+```
+
+```{python}
+# In[109]:
+
+
+hospital_ratings['Hospital overall rating'].value_counts()
+hospital_ratings = func_numeric(hospital_ratings,'Hospital overall rating')
+hospital_ratings.head()
+
+
+# In[110]:
+
+```
+
+```{python}
+# Let's check the Ownership type for the hospitals.
+
+hospital_ratings['Hospital Ownership'].value_counts()
+
+# We see the Private hospitals have the data regarding the ratings in the dataset.
+
+
+# In[111]:
+```
+
+```{python}
+
+# Let us remove the NA's values-
+
+
+hospital_ratings = hospital_ratings[hospital_ratings['Hospital overall rating'].notnull()]
+hospital_ratings.head()
+```
+
+
+## Univariate analysis - segmented
+
+```{python}
+# In[112]:
+
+
+hospital_ratings.groupby(['State', 'Hospital overall rating']).agg({'State': np.count_nonzero})
+
+
+# In[113]:
+```
+
+```{python}
+
+hospital_ratings.groupby(['State'])['Hospital overall rating'].agg({'Hospital overall rating': np.mean }).sort_values(by=['Hospital overall rating'], ascending= False).head()
+```
+
+```{python}
+
+hospital_ratings.groupby(['State']).size().sort_values(ascending=False).head()
+
+```
+
+```{python}
+# In[115]:
+
+
+avg_by_state = hospital_ratings.groupby(['State'])['Hospital overall rating'].agg({'Hospital overall rating': np.mean })
+
+avg_by_state = avg_by_state.sort_values(by=['Hospital overall rating'], ascending= False).reset_index()
+
+
+# We see that South Dakota(SD) has the highest average of 4.2 but the frequency is not the highest.
+# we see that Indiana has an average of 3.59 and has the highest frequency.
+# We see that Wisconsin has an average of 3.69 and a good count of providers.
+
+avg_by_state.head()
+
+
+
+# In[116]:
+```
+
+
+```{python}
+
+sns.barplot(x= 'State', y= "Hospital overall rating", data = avg_by_state.head(10), palette = 'hls')
+
+plt.title("Average Ratings by State")
+plt.show()
+
+
+# In[118]:
+
+
+```
+
+
+# Hospital ownership analysis
+
+```{python}
+avg_by_hosp_ownership = hospital_ratings.groupby(["Hospital Ownership"])["Hospital overall rating"].agg({"Hospital overall rating": np.mean })
+
+avg_by_hosp_ownership = avg_by_hosp_ownership.sort_values(by=["Hospital overall rating"], ascending= False).reset_index()
+
+avg_by_hosp_ownership.head(10)
+
+
+```
+
+
+
+```{python}
+
+
+
+plot = sns.barplot(x = "Hospital Ownership", y= "Hospital overall rating", data = avg_by_hosp_ownership.head(10), palette = 'hls')
+plot.set_xticklabels(plot.get_xticklabels(), rotation=45)
+
+plt.title("Average Ratings by Ownership")
+plt.show()
+
+
+```
+
+# Readmission analysis
+
+
+
+
+```{python}
+
+# Here we see that the average ratings of hospitals which have above the national average for readmissions is about 3.57 and around 811 hospitals rank here
+# A considerable number of hospitals have average same as national average and their average rating is around 3.12
+# Above and Below national average hospitals are similar in number with respect to the readmissions count.
+
+
+hospital_ratings.groupby(["Readmission national comparison"]).size().sort_values(ascending=False).head()
+```
+
+```{python}
+
+
+avg_by_readmission = hospital_ratings.groupby(["Readmission national comparison"])["Hospital overall rating"].agg({"Hospital overall rating": np.mean })
+
+avg_by_readmission = avg_by_readmission.sort_values(by=["Hospital overall rating"], ascending= False).reset_index()
+
+# Those which are below the national average have an average rating around 2.37.
+avg_by_readmission.head(10)
+
+```
+
+
+```{python}
+
+plot = sns.barplot(x = "Readmission national comparison", y= "Hospital overall rating", data = avg_by_readmission.head(10), palette = 'hls')
+plot.set_xticklabels(plot.get_xticklabels(), rotation=45)
+
+plt.title("Average Ratings by Readmissions")
+plt.show()
+
+```
+
+# Average Mortality Ratings
+
+```{python}
+# Excluding the NA's, around 400 hospitals have mortality rate above the national average
+# A considerable number of hospitals (2124) have mortality rate same as the National average
+# Few hospitals (343) have the mortality rate below the National average.
+
+plot_avg_comparison("Mortality national comparison")
+
+```
+
+```{python}
+# Here we see that the average ratings of hospitals which have above the national average for safety of care is about 3.44 and around 804 hospitals rank here
+# A considerable number of hospitals have average same as national average and their average rating is around 3.09
+# Those which are below the national average have an average rating around 2.36.
+
+
+plot_avg_comparison("Safety of care national comparison")
+
+
+```
+
+```{python}
+# There's not much difference between the average ratings of above and same as
+# national average hospitals by medical group variables
+plot_avg_comparison("Efficient use of medical imaging national comparison")
+```
+
+```{python}
+# Timeliness has a significant effect on the average rating (from 2.62 to 3.22)
+
+plot_avg_comparison("Timeliness of care national comparison")
+```
+
+```{python}
+
+plot_avg_comparison("Effectiveness of care national comparison")
+```
+
+
+# Bivariate Analysis
+
+```{python}
+
+plot_corr_map(cleaned_readmission)
+
+```
+
+
+```{python}
+plot_corr_map(cleaned_mortality)
+
+```
+
+```{python}
+
+plot_corr_map(cleaned_safety)
+```
+
+```{python}
+
+plot_corr_map(cleaned_experience)
+```
+
+```{python}
+
+plot_corr_map(cleaned_medical)
+```
+
+```{python}
+
+plot_corr_map(cleaned_timeliness)
+```
+
+```{python}
+
+plot_corr_map(cleaned_effectiveness)
+```
+
+```{python}
+
+plot_corr_map(cleaned_master.head(10))
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+

@@ -1,0 +1,529 @@
+---
+title: "04_PCA_And_Clustering"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#setwd("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/")
+knitr::opts_knit$set(root.dir = normalizePath("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/submission/"))  # should change the working directory to 'Users/Me/Docs/Proj'
+```
+
+
+```{python}
+import os
+os.chdir("/Users/eklavya/projects/education/formalEducation/DataScience/DataScienceAssignments/HealthCare/Capstone/submission/")
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.neighbors import NearestNeighbors
+from random import sample
+from numpy.random import uniform
+from math import isnan
+
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn import metrics
+from sklearn.decomposition import PCA
+from sklearn.model_selection import train_test_split
+import sklearn
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, normalize
+from sklearn.cluster import AgglomerativeClustering
+
+from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import dendrogram
+from scipy.cluster.hierarchy import cut_tree
+
+import warnings
+warnings.filterwarnings('ignore')
+sns.set_style('whitegrid')
+sns.set_context('paper')
+
+def print_ln():
+    print('-' * 80, '\n')
+
+
+```
+
+
+
+
+```{python}
+
+
+
+# General Hospital Ratings
+cleaned_hospital_ratings = pd.read_csv("cleaned_hospital_ratings_data.csv", index_col='Provider ID')
+
+# Group-1 Readmission
+cleaned_readmission = pd.read_csv("cleaned_readmission_data.csv", index_col='Provider ID')
+read_master = pd.read_csv("read_master_data.csv", index_col='Provider ID')
+
+# Group-2 Mortality
+cleaned_mortality = pd.read_csv("cleaned_mortality_data.csv", index_col='Provider ID')
+mort_master = pd.read_csv("mort_master_data.csv", index_col='Provider ID')
+
+# Group-3 Safety
+cleaned_safety = pd.read_csv("cleaned_safety_data.csv", index_col='Provider ID')
+safe_master = pd.read_csv("safe_master_data.csv", index_col='Provider ID')
+
+# Group-4 Experience
+cleaned_experience = pd.read_csv("cleaned_experience_data.csv", index_col='Provider ID')
+expe_master = pd.read_csv("expe_master_data.csv", index_col='Provider ID')
+
+# Group-5 Medical
+cleaned_medical = pd.read_csv("cleaned_medical_data.csv", index_col='Provider ID')
+medi_master = pd.read_csv("medi_master_data.csv", index_col='Provider ID')
+
+# Group-6 Timeliness
+cleaned_timeliness = pd.read_csv("cleaned_timeliness_data.csv", index_col='Provider ID')
+time_master = pd.read_csv("time_master_data.csv", index_col='Provider ID')
+
+# Group-7 Effectiveness
+cleaned_effectiveness = pd.read_csv("cleaned_effectiveness_data.csv", index_col='Provider ID')
+effe_master = pd.read_csv("effe_master_data.csv", index_col='Provider ID')
+
+# Cleaned master dataset
+cleaned_master = pd.read_csv("cleaned_master_data.csv", index_col='Provider ID')
+
+
+
+```
+
+
+
+# PCA on a group of measures
+
+```{python}
+effe_master.columns
+print_ln()
+
+eff = effe_master.drop(effe_master.iloc[:, 0:7], axis=1)
+eff.columns
+
+```
+
+
+```{python}
+eff = eff.dropna(thresh= 3)
+
+eff.to_csv("eff_group_data.csv")
+
+eff.info()
+```
+
+
+```{python}
+eff = eff.apply(lambda x: x.fillna(x.median()), axis=0)
+eff
+
+```
+
+
+```{python}
+
+## With Incremental PCA
+
+from sklearn.decomposition import IncrementalPCA, PCA
+pca = IncrementalPCA()
+eff_pca = pca.fit_transform(eff)
+eff_pca = pd.DataFrame(eff_pca, columns=eff.columns)
+eff_pca.index = eff.index
+eff_pca
+
+
+```
+
+```{python}
+pca.explained_variance_ratio_
+```
+
+
+```{python}
+eff_pca_weights = pd.DataFrame(pca.components_, columns=eff.columns)
+eff_pca_weights
+
+```
+
+
+
+```{python}
+
+eff_measure_weight = eff_pca.mean(axis=1)
+eff_measure_weight
+
+
+```
+
+```{python}
+
+eff_scores = pd.DataFrame({'effe' : eff_measure_weight})
+eff_scores
+```
+
+
+```{python}
+def function_group_score(numeric_df, score_name):
+    df = numeric_df.dropna(thresh= 3)
+    imputed_df = df.apply(lambda x: x.fillna(x.median()), axis=0)
+    pca = IncrementalPCA()
+    df_pca = pca.fit_transform(imputed_df)
+    df_pca = pd.DataFrame(df_pca, columns= df.columns)
+    df_pca.index = df.index
+    df_with_weight = df_pca.mean(axis=1)
+    df_scores = pd.DataFrame({score_name : df_with_weight})
+    return df_scores
+
+
+```
+
+```{python}
+
+effe_master = pd.read_csv("effe_master_data.csv", index_col='Provider ID')
+eff = effe_master.drop(effe_master.iloc[:, 0:7], axis=1)
+eff.head(10)
+print_ln()
+
+effectiveness_scores = function_group_score(eff, 'effe_score')
+effectiveness_scores.head(10)
+
+```
+
+
+```{python}
+
+df = pd.read_csv("read_master_data.csv", index_col= 'Provider ID')
+df.columns
+print_ln()
+
+num_df = df.drop(df.iloc[:, 0:7], axis=1)
+num_df.columns
+print_ln()
+
+readmission_scores = function_group_score(num_df, 'radm_score')
+readmission_scores
+
+```
+
+```{python}
+
+df = pd.read_csv("mort_master_data.csv", index_col= 'Provider ID')
+df.columns
+print_ln()
+
+num_df = df.drop(df.iloc[:, 0:7], axis=1)
+num_df.columns
+print_ln()
+
+mortality_scores = function_group_score(num_df, 'mort_score')
+mortality_scores
+
+```
+
+```{python}
+
+df = pd.read_csv("safe_master_data.csv", index_col='Provider ID')
+df.columns
+print_ln()
+
+num_df = df.drop(df.iloc[:, 0:7], axis=1)
+num_df.columns
+print_ln()
+
+safety_scores = function_group_score(num_df, 'safety_score')
+safety_scores
+
+```
+
+```{python}
+
+df = pd.read_csv("expe_master_data.csv", index_col='Provider ID')
+df.columns
+print_ln()
+
+num_df = df.drop(df.iloc[:, 0:7], axis=1)
+num_df.columns
+print_ln()
+
+experience_scores = function_group_score(num_df, 'expe_score')
+experience_scores
+
+```
+
+```{python}
+
+df = pd.read_csv("medi_master_data.csv", index_col='Provider ID')
+df.columns
+print_ln()
+
+num_df = df.drop(df.iloc[:, 0:7], axis=1)
+num_df.columns
+print_ln()
+
+medical_scores = function_group_score(num_df, 'medi_score')
+medical_scores
+
+```
+
+
+
+```{python}
+
+df = pd.read_csv("time_master_data.csv", index_col='Provider ID')
+df.columns
+print_ln()
+
+num_df = df.drop(df.iloc[:, 0:7], axis=1)
+num_df.columns
+print_ln()
+
+timeliness_scores = function_group_score(num_df, 'time_score')
+timeliness_scores
+
+```
+
+
+
+
+```{python}
+merge1= pd.merge(readmission_scores, mortality_scores, on= 'Provider ID')
+merge2= pd.merge(merge1, safety_scores, on= 'Provider ID')
+merge3= pd.merge(merge2, experience_scores, on= 'Provider ID')
+merge4= pd.merge(merge3, medical_scores, on= 'Provider ID')
+merge5= pd.merge(merge4, timeliness_scores, on= 'Provider ID')
+merge6= pd.merge(merge5, effectiveness_scores, on= 'Provider ID')
+group_scores = merge6
+
+group_scores.columns
+print_ln()
+
+
+group_scores.to_csv("group_score_data.csv")
+
+group_scores
+
+
+```
+
+
+```{python}
+# readmission = 0.22, mortality = 0.22, safety = 0.22, experience = 0.22, medical = 0.04, timeliness = 0.04, effectiveness = 0.04
+cms_weights = pd.Series([0.22,  0.22,  0.22,  0.22,  0.04,  0.04,  0.04], index=group_scores.columns)
+cms_weights
+```
+
+
+
+```{python}
+# Multiply each group_scores with corresponding measure weights given by CMS and sum
+# them to form final_score=sum(each_column * cms_weights)/7
+
+final_scores = pd.DataFrame(group_scores.multiply(cms_weights, axis=1).apply(np.sum, axis=1)/7, columns=['final_score'])
+final_scores.to_csv("final_scores_data.csv')
+final_scores.head(10)
+```
+
+
+# Calculation of final scores is now complete
+
+##########################
+# K-means
+##########################
+
+##########################
+# KMeans on final scores
+
+
+
+
+```{python}
+final_scores_scaled = pd.DataFrame(StandardScaler().fit_transform(final_scores), index=final_scores.index, columns=['final_score'])
+final_scores_scaled
+
+
+kmeans_model = KMeans(n_clusters = 5, max_iter=100,random_state = 100)
+kmeans_model.fit(final_scores_scaled)
+
+# Adjust ClusterID to reflect the star rating system
+final_scores_scaled['ClusterID'] = kmeans_model.labels_ + 1
+
+final_scores_scaled.head(10)
+
+```
+
+
+```{python}
+
+# Merge the final_scores and ratings dataset
+
+final_scores_scaled_and_ratings= pd.merge(final_scores_scaled, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
+final_scores_scaled_and_ratings.head()
+
+print_ln()
+
+real_ratings =  final_scores_scaled_and_ratings['Hospital overall rating']
+pred_ratings =  final_scores_scaled_and_ratings['ClusterID']
+
+print("Accuracy:", metrics.accuracy_score(real_ratings, pred_ratings))
+
+```
+
+##########################
+# KMeans on group scores
+
+
+```{python}
+# Merge the group_scores and ratings dataset
+
+#groups_and_ratings= pd.merge(group_scores, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
+#groups_and_ratings.head()
+
+
+
+group_scores_scaled = pd.DataFrame(StandardScaler().fit_transform(group_scores), index=group_scores.index, columns=group_scores.columns)
+group_scores_scaled
+
+
+kmeans_model = KMeans(n_clusters = 5, max_iter=100,random_state = 100)
+kmeans_model.fit(group_scores_scaled)
+
+# Adjust ClusterID to reflect the star rating system
+group_scores_scaled['ClusterID'] = kmeans_model.labels_ + 1
+
+group_scores_scaled.head(10)
+
+# Merge the group_scores and ratings dataset
+
+group_scores_scaled_and_ratings= pd.merge(group_scores_scaled, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
+group_scores_scaled_and_ratings.head()
+
+print_ln()
+
+real_ratings =  group_scores_scaled_and_ratings['Hospital overall rating']
+pred_ratings =  group_scores_scaled_and_ratings['ClusterID']
+
+print("Accuracy:", metrics.accuracy_score(real_ratings, pred_ratings))
+
+
+```
+
+
+##########################
+# Hierarchal Clustering
+##########################
+
+```{python}
+
+final_scores_scaled = pd.DataFrame(StandardScaler().fit_transform(final_scores), index=final_scores.index, columns=['final_score'])
+
+cluster_model = AgglomerativeClustering(n_clusters=4, affinity='euclidean', linkage='ward')
+
+cluster_model.fit(final_scores_scaled)
+
+# Adjust ClusterID to reflect the star rating system
+final_scores_scaled['ClusterID'] = cluster_model.labels_ + 1
+
+final_scores_scaled.head(10)
+
+# Merge the final_scores and ratings dataset
+
+final_scores_scaled_and_ratings= pd.merge(final_scores_scaled, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
+final_scores_scaled_and_ratings.head()
+
+print_ln()
+
+real_ratings =  final_scores_scaled_and_ratings['Hospital overall rating']
+pred_ratings =  final_scores_scaled_and_ratings['ClusterID']
+
+print("Accuracy:", metrics.accuracy_score(real_ratings, pred_ratings))
+
+```
+
+
+
+##########################
+# Final Scores
+
+```{python}
+
+final_scores_scaled = pd.DataFrame(StandardScaler().fit_transform(final_scores), index=final_scores.index, columns=['final_score'])
+
+
+# single linkage
+mergings = linkage(final_scores_scaled, method="single", metric='euclidean')
+dendrogram(mergings)
+plt.show()
+
+
+
+```
+
+
+```{python}
+
+
+cluster_labels = cut_tree(mergings, n_clusters=5).reshape(-1, )
+
+# Adjust ClusterID to reflect the star rating system
+final_scores_scaled['ClusterID'] = cluster_labels + 1
+
+final_scores_scaled.head(10)
+
+# Merge the group_scores and ratings dataset
+
+final_scores_scaled_and_ratings= pd.merge(group_scores_scaled, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
+final_scores_scaled_and_ratings.head()
+
+print_ln()
+
+real_ratings =  final_scores_scaled_and_ratings['Hospital overall rating']
+pred_ratings =  final_scores_scaled_and_ratings['ClusterID']
+
+print("Accuracy:", metrics.accuracy_score(real_ratings, pred_ratings))
+
+
+```
+
+
+```{python}
+
+group_scores_scaled = pd.DataFrame(StandardScaler().fit_transform(group_scores), index=group_scores.index, columns=group_scores.columns)
+
+# complete linkage
+mergings = linkage(group_scores_scaled, method="complete", metric='euclidean')
+dendrogram(mergings)
+plt.show()
+
+```
+
+
+```{python}
+
+cluster_labels = cut_tree(mergings, n_clusters=5).reshape(-1, )
+
+# Adjust ClusterID to reflect the star rating system
+group_scores_scaled['ClusterID'] = cluster_labels + 1
+
+group_scores_scaled.head(10)
+
+# Merge the group_scores and ratings dataset
+
+group_scores_scaled_and_ratings= pd.merge(group_scores_scaled, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
+group_scores_scaled_and_ratings.head()
+
+print_ln()
+
+real_ratings =  group_scores_scaled_and_ratings['Hospital overall rating']
+pred_ratings =  group_scores_scaled_and_ratings['ClusterID']
+
+print("Accuracy:", metrics.accuracy_score(real_ratings, pred_ratings))
+
+
+
+```
