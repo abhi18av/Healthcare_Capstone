@@ -46,16 +46,6 @@ def print_ln():
     print('-' * 80, '\n')
 
 
-def plot_avg_comparison(col_name):
-    print(hospital_ratings.groupby([col_name]).size().sort_values(ascending=False).head())
-    avg_by_col_name = hospital_ratings.groupby([col_name])["Hospital overall rating"].agg({"Hospital overall rating": np.mean })
-    avg_by_col_name = avg_by_col_name.sort_values(by=["Hospital overall rating"], ascending= False).reset_index()
-    plot = sns.barplot(x = col_name, y= "Hospital overall rating", data = avg_by_col_name.head(10), palette = 'hls')
-    plot.set_xticklabels(plot.get_xticklabels(), rotation=45)
-    plt.title("Average " +  col_name)
-    plt.show()
- 
-
 ```
 
 ```{python}
@@ -72,11 +62,6 @@ cleaned_master = pd.read_csv("cleaned_master_data.csv", index_col='Provider ID')
 from sklearn.model_selection import train_test_split
 
 #cleaned_master_data['Hospital overall rating'], factors_hospital_overall_rating =  pd.factorize(cleaned_master_data['Hospital overall rating'])
-
-#cleaned_master_data = pd.get_dummies(cleaned_master_data['Hospital overall rating'], prefix='Hospital overall rating', drop_first=True)
-print(cleaned_master)
-
-print_ln()
 
 X = cleaned_master.loc[:, cleaned_master.columns != 'Hospital overall rating']
 y = cleaned_master.loc[:, 'Hospital overall rating']
@@ -105,22 +90,171 @@ print_ln()
 
 ```{python}
 
+# 100 estimators
+
+from sklearn.ensemble import RandomForestClassifier
+
+model_rf1= RandomForestClassifier(n_estimators= 100,                                   
+                                  random_state = 100,
+                                  max_depth=5, 
+                                  min_samples_leaf=50,
+                                  min_samples_split=50)
+
+#Train the model using the training sets y_pred=clf.predict(X_test)
+model_rf1.fit(X_train, y_train)
+
+y_pred= model_rf1.predict(X_test)
+
+#Import scikit-learn metrics module for accuracy calculation
+from sklearn import metrics
+
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+
+
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import classification_report, confusion_matrix
+
+
+model_rf1_score = cross_val_score(model_rf1, X, y, cv=10)
+
+
+print("=== Confusion Matrix ===")
+print(confusion_matrix(y_test, y_pred))
+print_ln()
+
+print("=== Classification Report ===")
+print(classification_report(y_test, y_pred))
+print_ln()
+
+print("=== All AUC Scores ===")
+print(model_rf1_score)
+
+print_ln()
+
+print("=== Mean AUC Score ===")
+print("Mean AUC Score - Random Forest: ", model_rf1_score.mean())
+print_ln()
+
+
 ```
 
 ```{python}
+from sklearn.ensemble import RandomForestClassifier
+
+model_rf2= RandomForestClassifier(n_estimators= 100,                                   
+                                  random_state = 100,
+                                  criterion='entropy'
+                                  min_samples_leaf=30,
+                                  min_samples_split=30)
+
+
+#Train the model using the training sets y_pred=clf.predict(X_test)
+model_rf2.fit(X_train, y_train)
+
+y_pred= model_rf2.predict(X_test)
+
+#Import scikit-learn metrics module for accuracy calculation
+from sklearn import metrics
+
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+
+
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import classification_report, confusion_matrix
+
+
+model_rf2_score = cross_val_score(model_rf2, X, y, cv=10)
+
+
+print("=== Confusion Matrix ===")
+print(confusion_matrix(y_test, y_pred))
+print_ln()
+
+print("=== Classification Report ===")
+print(classification_report(y_test, y_pred))
+print_ln()
+
+print("=== All AUC Scores ===")
+print(model_rf2_score)
+
+print_ln()
+
+print("=== Mean AUC Score ===")
+print("Mean AUC Score - Random Forest: ", model_rf2_score.mean())
+print_ln()
 
 ```
 
 ```{python}
+# 1500 estimators
+
+from sklearn.ensemble import RandomForestClassifier
+
+model_rf3= RandomForestClassifier(n_estimators= 1500)
+
+#Train the model using the training sets y_pred=clf.predict(X_test)
+model_rf3.fit(X_train, y_train)
+
+y_pred= model_rf3.predict(X_test)
+
+#Import scikit-learn metrics module for accuracy calculation
+from sklearn import metrics
+
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
+
+
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import classification_report, confusion_matrix
+
+
+model_rf3_score = cross_val_score(model_rf3, X, y, cv=10)
+
+
+print("=== Confusion Matrix ===")
+print(confusion_matrix(y_test, y_pred))
+print_ln()
+
+print("=== Classification Report ===")
+print(classification_report(y_test, y_pred))
+print_ln()
+
+print("=== All AUC Scores ===")
+print(model_rf3_score)
+
+print_ln()
+
+print("=== Mean AUC Score ===")
+print("Mean AUC Score - Random Forest: ", model_rf3_score.mean())
+print_ln()
+
 
 ```
 
 ```{python}
-
+import pandas as pd
+feature_importances = pd.DataFrame(model_rf3.feature_importances_,
+                                   index = X_train.columns,
+                                    columns=['importance']).sort_values('importance', ascending=False)
+feature_importances
 ```
 
-```{python}
+# Random forest weight analysis by Eli5
 
+```{python}
+import eli5
+from eli5.sklearn import PermutationImportance
+
+perm = PermutationImportance(model_rf1, cv = None, refit = False, n_iter = 50).fit(X_train, y_train)
+eli5.show_weights(perm)
 ```
 
 ```{python}
