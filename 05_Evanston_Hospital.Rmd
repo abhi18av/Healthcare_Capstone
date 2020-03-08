@@ -88,4 +88,287 @@ effe_master = pd.read_csv("effe_master_data.csv", index_col='Provider ID')
 # Cleaned master dataset
 cleaned_master = pd.read_csv("cleaned_master_data.csv", index_col='Provider ID')
 
+# Hospital group and final scores along with actual and predicted rating
+all_scores_with_clusters=  pd.read_csv('all_scores_with_clusters_data.csv', index_col='Provider ID')
+
+
+readmission_scores = pd.read_csv("readmission_scores.csv", index_col='Provider ID')
+mortality_scores = pd.read_csv("mortality_scores.csv", index_col='Provider ID')
+safety_scores = pd.read_csv("safety_scores.csv", index_col='Provider ID')
+experience_scores = pd.read_csv("experience_scores.csv", index_col='Provider ID')
+medical_scores = pd.read_csv("medical_scores.csv", index_col='Provider ID')
+timeliness_scores = pd.read_csv("timeliness_scores.csv", index_col='Provider ID')
+effectiveness_scores = pd.read_csv("effectiveness_scores.csv", index_col='Provider ID')
+
+
+all_hospital_ratings = cleaned_hospital_ratings[['Hospital overall rating']]
+
 ```
+
+
+```{python}
+
+
+all_scores_with_clusters.head()
+print_ln()
+
+all_scores_with_clusters.describe()
+
+```
+
+
+
+```{python}
+# Provider: Evanston Hospital Provider.ID = 140010
+# Check the group scores for the provider.ID = 140010
+
+evanston_scores= pd.DataFrame(all_scores_with_clusters.loc[140010, :]).transpose().drop(['Hospital overall rating', 'ClusterID'], axis=1)
+evanston_scores.index= ['evanston_scores']
+evanston_scores
+
+```
+
+```{python}
+mean_scores = pd.DataFrame(all_scores_with_clusters.mean(), columns=['mean_scores']).transpose().drop(['Hospital overall rating', 'ClusterID'], axis=1)
+mean_scores
+
+````
+
+
+
+
+```{python}
+median_scores = pd.DataFrame(all_scores_with_clusters.median(), columns=['median_scores']).transpose().drop(['Hospital overall rating', 'ClusterID'], axis=1)
+median_scores
+
+````
+
+```{python}
+five_star_mean_scores= all_scores_with_clusters.drop(['ClusterID'], axis=1).groupby(['Hospital overall rating']).mean().tail(1)
+five_star_mean_scores.index= ['five_star_rating']
+five_star_mean_scores
+
+````
+
+
+```{python}
+comparative_analysis= pd.concat([mean_scores, evanston_scores, five_star_mean_scores])
+comparative_analysis.info()
+comparative_analysis
+
+````
+
+```{python}
+comparative_analysis.plot(kind='bar')
+
+````
+
+
+```{python}
+comparative_analysis.drop(['time_score', 'final_score'], axis=1).plot(kind='bar')
+
+````
+
+# okay - medi_score
+# high - time_scores / final_scores(as a derived metric)
+# low - radm / safety / expe / effe
+
+```{python}
+comparative_analysis[['time_score']].plot(kind='bar')
+
+````
+
+```{python}
+comparative_analysis[['final_score']].plot(kind='bar')
+
+````
+
+# high - time_scores 
+
+
+
+```{python}
+effectiveness_scores_and_ratings = pd.merge(effectiveness_scores, all_hospital_ratings, on='Provider ID')
+effectiveness_scores_and_ratings.head(10)
+```
+
+```{python}
+evanston_effectiveness_scores=  pd.DataFrame(effectiveness_scores_and_ratings.loc[140010, :]).transpose().drop(['Hospital overall rating'], axis=1)
+evanston_effectiveness_scores.index= ['evanston_scores']
+evanston_effectiveness_scores
+````
+
+```{python}
+effectiveness_five_star_mean_scores= effectiveness_scores_and_ratings.groupby(['Hospital overall rating']).mean().tail(1)
+effectiveness_five_star_mean_scores.index= ['five_star_rating']
+effectiveness_five_star_mean_scores
+
+````
+
+
+```{python}
+
+
+def create_comparative_scores(scores_df):
+    score_with_ratings_df= pd.merge(scores_df, all_hospital_ratings, on='Provider ID')
+    
+    evanston_scores=  pd.DataFrame(score_with_ratings_df.loc[140010, :]).transpose().drop(['Hospital overall rating'], axis=1)
+    evanston_scores.index= ['evanston_scores']
+    
+    five_star_mean_scores= score_with_ratings_df.groupby(['Hospital overall rating']).mean().tail(1)
+    five_star_mean_scores.index= ['five_star_rating']
+    
+    comparative_analysis= pd.concat([evanston_scores, five_star_mean_scores])
+    
+    return comparative_analysis
+
+
+effectiveness_comparative_scores= create_comparative_scores(effectiveness_scores)
+effectiveness_comparative_scores
+
+
+```
+
+
+
+```{python}
+effectiveness_comparative_scores.plot(kind='bar')
+
+
+````
+
+
+
+
+```{python}
+timeliness_comparative_scores= create_comparative_scores(timeliness_scores)
+timeliness_comparative_scores
+
+
+````
+
+
+```{python}
+
+timeliness_comparative_scores.plot(kind='bar')
+````
+
+```{python}
+
+
+mortality_comparative_scores= create_comparative_scores(mortality_scores)
+mortality_comparative_scores
+
+mortality_comparative_scores.plot(kind='bar')
+
+````
+
+```{python}
+
+
+````
+
+```{python}
+
+
+````
+
+```{python}
+
+
+````
+
+
+
+# low - radm / expe / effe / safety
+
+```{python}
+safety_comparative_scores= create_comparative_scores(safety_scores)
+safety_comparative_scores
+
+safety_comparative_scores.plot(kind='bar')
+
+
+````
+
+```{python}
+
+readmision_comparative_scores= create_comparative_scores(readmission_scores)
+readmision_comparative_scores
+
+readmision_comparative_scores.plot(kind='bar')
+
+
+````
+
+```{python}
+
+readmision_comparative_scores= create_comparative_scores(readmission_scores)
+readmision_comparative_scores
+
+readmision_comparative_scores.plot(kind='bar')
+
+````
+
+
+```{python}
+
+medical_comparative_scores= create_comparative_scores(medical_scores)
+medical_comparative_scores
+
+medical_comparative_scores.plot(kind='bar')
+
+
+````
+
+
+
+```{python}
+experience_comparative_scores= create_comparative_scores(experience_scores)
+experience_comparative_scores
+
+experience_comparative_scores.plot(kind='bar')
+
+
+````
+
+
+
+```{python}
+
+
+```
+
+
+```{python}
+
+
+```
+
+```{python}
+
+
+```
+
+```{python}
+
+
+```
+
+```{python}
+
+
+```
+
+```{python}
+
+
+```
+
+```{python}
+
+
+```
+
+
+

@@ -185,9 +185,10 @@ def function_group_score(numeric_df, score_name):
 
 ```{python}
 
-effe_master = pd.read_csv("effe_master_data.csv", index_col='Provider ID')
-eff = effe_master.drop(effe_master.iloc[:, 0:7], axis=1)
-eff.head(10)
+df = pd.read_csv("effe_master_data.csv", index_col='Provider ID')
+num_df = df.drop(effe_master.iloc[:, 0:7], axis=1)
+num_df.to_csv('effectiveness_scores.csv')
+num_df.head(10)
 print_ln()
 
 effectiveness_scores = function_group_score(eff, 'effe_score')
@@ -203,6 +204,7 @@ df.columns
 print_ln()
 
 num_df = df.drop(df.iloc[:, 0:7], axis=1)
+num_df.to_csv('readmission_scores.csv')
 num_df.columns
 print_ln()
 
@@ -218,6 +220,7 @@ df.columns
 print_ln()
 
 num_df = df.drop(df.iloc[:, 0:7], axis=1)
+num_df.to_csv('mortality_scores.csv')
 num_df.columns
 print_ln()
 
@@ -233,6 +236,7 @@ df.columns
 print_ln()
 
 num_df = df.drop(df.iloc[:, 0:7], axis=1)
+num_df.to_csv('safety_scores.csv')
 num_df.columns
 print_ln()
 
@@ -248,6 +252,7 @@ df.columns
 print_ln()
 
 num_df = df.drop(df.iloc[:, 0:7], axis=1)
+num_df.to_csv('experience_scores.csv')
 num_df.columns
 print_ln()
 
@@ -264,6 +269,7 @@ print_ln()
 
 num_df = df.drop(df.iloc[:, 0:7], axis=1)
 num_df.columns
+num_df.to_csv('medical_scores.csv')
 print_ln()
 
 medical_scores = function_group_score(num_df, 'medi_score')
@@ -279,8 +285,9 @@ df = pd.read_csv("time_master_data.csv", index_col='Provider ID')
 df.columns
 print_ln()
 
-num_df = df.drop(df.iloc[:, 0:7], axis=1)
+num_df = df.drop(df.iloc[:, 0:8], axis=1)
 num_df.columns
+num_df.to_csv('timeliness_scores.csv')
 print_ln()
 
 timeliness_scores = function_group_score(num_df, 'time_score')
@@ -325,9 +332,19 @@ cms_weights
 # them to form final_score=sum(each_column * cms_weights)/7
 
 final_scores = pd.DataFrame(group_scores.multiply(cms_weights, axis=1).apply(np.sum, axis=1)/7, columns=['final_score'])
-final_scores.to_csv("final_scores_data.csv')
+final_scores.to_csv('final_scores_data.csv')
 final_scores.head(10)
 ```
+
+
+
+```{python}
+# Save the merged dataset 
+all_scores = pd.merge(group_scores, final_scores, on= 'Provider ID')
+all_scores.to_csv('all_scores_data.csv')
+all_scores.head(10)
+```
+
 
 
 # Calculation of final scores is now complete
@@ -527,3 +544,54 @@ print("Accuracy:", metrics.accuracy_score(real_ratings, pred_ratings))
 
 
 ```
+
+
+```{python}
+
+cluster_labels = cut_tree(mergings, n_clusters=5).reshape(-1, )
+
+# Adjust ClusterID to reflect the star rating system
+group_scores_scaled['ClusterID'] = cluster_labels + 1
+
+group_scores_scaled.head(10)
+
+# Merge the group_scores and ratings dataset
+
+group_scores_scaled_and_ratings= pd.merge(group_scores_scaled, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
+group_scores_scaled_and_ratings.head()
+
+print_ln()
+
+real_ratings =  group_scores_scaled_and_ratings['Hospital overall rating']
+pred_ratings =  group_scores_scaled_and_ratings['ClusterID']
+
+print("Accuracy:", metrics.accuracy_score(real_ratings, pred_ratings))
+
+
+
+```
+
+
+```{python}
+# Save the dataset with ratings
+all_scores_with_cluster =  pd.merge(all_scores, cleaned_hospital_ratings[['Hospital overall rating']], on="Provider ID")
+all_scores_with_cluster['ClusterID'] = cluster_labels + 1
+all_scores_with_cluster.to_csv('all_scores_with_clusters_data.csv')
+all_scores_with_cluster.head(10)
+
+```
+
+
+```{python}
+
+# TODO maybe we can re-map the cluster IDs as per the frequency of 'Hospital overall rating'
+all_scores_with_clusters.groupby(['Hospital overall rating']).size().sort_values(ascending=False).head()
+
+````
+
+
+```{python}
+# TODO maybe we can re-map the cluster IDs as per the frequency of 'Hospital overall rating'
+all_scores_with_clusters.groupby(['ClusterID']).size().sort_values(ascending=False).head()
+
+````
