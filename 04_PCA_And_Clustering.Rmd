@@ -285,7 +285,7 @@ df = pd.read_csv("time_master_data.csv", index_col='Provider ID')
 df.columns
 print_ln()
 
-num_df = df.drop(df.iloc[:, 0:7], axis=1)
+num_df = df.drop(df.iloc[:, 0:8], axis=1)
 num_df.columns
 num_df.to_csv('timeliness_scores.csv')
 print_ln()

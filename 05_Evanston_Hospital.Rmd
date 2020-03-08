@@ -239,11 +239,27 @@ effectiveness_comparative_scores.plot(kind='bar')
 
 
 
-# low - radm / safety / expe / effe
+
+```{python}
+timeliness_comparative_scores= create_comparative_scores(timeliness_scores)
+timeliness_comparative_scores
+
+
+````
 
 
 ```{python}
 
+timeliness_comparative_scores.plot(kind='bar')
+````
+
+```{python}
+
+
+mortality_comparative_scores= create_comparative_scores(mortality_scores)
+mortality_comparative_scores
+
+mortality_comparative_scores.plot(kind='bar')
 
 ````
 
@@ -262,12 +278,97 @@ effectiveness_comparative_scores.plot(kind='bar')
 
 ````
 
+
+
+# low - radm / expe / effe / safety
+
 ```{python}
+safety_comparative_scores= create_comparative_scores(safety_scores)
+safety_comparative_scores
+
+safety_comparative_scores.plot(kind='bar')
 
 
 ````
 
 ```{python}
 
+readmision_comparative_scores= create_comparative_scores(readmission_scores)
+readmision_comparative_scores
+
+readmision_comparative_scores.plot(kind='bar')
+
 
 ````
+
+```{python}
+
+readmision_comparative_scores= create_comparative_scores(readmission_scores)
+readmision_comparative_scores
+
+readmision_comparative_scores.plot(kind='bar')
+
+````
+
+
+```{python}
+
+medical_comparative_scores= create_comparative_scores(medical_scores)
+medical_comparative_scores
+
+medical_comparative_scores.plot(kind='bar')
+
+
+````
+
+
+
+```{python}
+experience_comparative_scores= create_comparative_scores(experience_scores)
+experience_comparative_scores
+
+experience_comparative_scores.plot(kind='bar')
+
+
+````
+
+
+
+```{python}
+
+
+```
+
+
+```{python}
+
+
+```
+
+```{python}
+
+
+```
+
+```{python}
+
+
+```
+
+```{python}
+
+
+```
+
+```{python}
+
+
+```
+
+```{python}
+
+
+```
+
+
+
